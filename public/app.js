@@ -18,7 +18,7 @@ const DEFAULT_STATE = {
   ]
 };
 
-// Preset reference dataset accessible via the "Load Reference Sample" button
+// Preset reference dataset accessible via the "Load Sample Data" button
 const SAMPLE_REFERENCE_STATE = {
   electricDate: "2026-08-12",
   waterStartDate: "2026-05-01",
@@ -37,8 +37,11 @@ const SAMPLE_REFERENCE_STATE = {
 };
 
 const STORAGE_KEY = "utility_calculator_user_data";
+const HISTORY_KEY = "utility_calculator_bill_history";
+const THEME_KEY = "utility_calculator_theme";
 
-let appState = loadSavedState() || JSON.parse(JSON.stringify(SAMPLE_REFERENCE_STATE));
+let appState = normalizeState(loadSavedState() || JSON.parse(JSON.stringify(SAMPLE_REFERENCE_STATE)));
+let billHistory = loadBillHistory();
 
 // --- DOM Elements ---
 const elElectricDate = document.getElementById("electricDate");
@@ -58,7 +61,24 @@ const elBtnLoadSample = document.getElementById("btnLoadSample");
 const elBtnRollForward = document.getElementById("btnRollForward");
 const elBtnCopyReport = document.getElementById("btnCopyReport");
 const elBtnOpenPdf = document.getElementById("btnOpenPdf");
+const elBtnShareWa = document.getElementById("btnShareWa");
+const elBtnDownloadImg = document.getElementById("btnDownloadImg");
+const elBtnSaveHistory = document.getElementById("btnSaveHistory");
+const elBtnClearHistory = document.getElementById("btnClearHistory");
+const elBtnThemeToggle = document.getElementById("btnThemeToggle");
+const elThemeIcon = document.getElementById("themeIcon");
 const elPdfPreviewWrapper = document.getElementById("pdfPreviewWrapper");
+
+// History & Backup Elements
+const elHistoryListContainer = document.getElementById("historyListContainer");
+const elHistoryCountBadge = document.getElementById("historyCountBadge");
+const elHistoryChartCard = document.getElementById("historyChartCard");
+const elHistoryAvgBadge = document.getElementById("historyAvgBadge");
+const elHistoryTrendCanvas = document.getElementById("historyTrendChart");
+const elBtnExportHistoryJson = document.getElementById("btnExportHistoryJson");
+const elBtnImportHistoryJson = document.getElementById("btnImportHistoryJson");
+const elInputImportHistoryFile = document.getElementById("inputImportHistoryFile");
+let historyChartInstance = null;
 
 // Miniature PDF Preview Elements
 const elMiniDocPeriod = document.getElementById("miniDocPeriod");
@@ -82,13 +102,50 @@ const elDispBalance = document.getElementById("dispBalance");
 const elToast = document.getElementById("toast");
 
 let latestFormattedReport = "";
+let latestSummaryMetrics = null;
 
 // --- Initialization ---
 function init() {
+  initTheme();
   bindFormInputs();
   renderRooms();
+  renderHistoryList();
   attachEventListeners();
   recalculate();
+}
+
+function normalizeState(state) {
+  if (!state || typeof state !== "object") {
+    return JSON.parse(JSON.stringify(SAMPLE_REFERENCE_STATE));
+  }
+  if (!Array.isArray(state.rooms) || state.rooms.length === 0) {
+    state.rooms = [{ id: "room_1", name: "", prevMeter: "", currMeter: "", tenants: [""] }];
+  } else {
+    state.rooms.forEach(r => {
+      if (typeof r.tenants === "string") {
+        r.tenants = r.tenants.split(",").map(t => t.trim());
+      } else if (Array.isArray(r.tenants)) {
+        r.tenants = r.tenants.map(t => (typeof t === "object" && t !== null ? (t.name || "") : String(t || "")));
+      } else {
+        r.tenants = [""];
+      }
+      if (r.tenants.length === 0) {
+        r.tenants = [""];
+      }
+    });
+  }
+  return state;
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  document.documentElement.setAttribute("data-bs-theme", savedTheme);
+  updateThemeIcon(savedTheme);
+}
+
+function updateThemeIcon(theme) {
+  if (!elThemeIcon) return;
+  elThemeIcon.className = theme === "dark" ? "bi bi-sun-fill text-warning" : "bi bi-moon-stars";
 }
 
 function bindFormInputs() {
@@ -146,13 +203,11 @@ function attachEventListeners() {
   });
 
   if (elBtnResetAll) {
-    elBtnResetAll.addEventListener("click", () => {
-      resetAllInputs();
-    });
+    elBtnResetAll.addEventListener("click", resetAllInputs);
   }
 
   elBtnLoadSample.addEventListener("click", () => {
-    appState = JSON.parse(JSON.stringify(SAMPLE_REFERENCE_STATE));
+    appState = normalizeState(JSON.parse(JSON.stringify(SAMPLE_REFERENCE_STATE)));
     bindFormInputs();
     renderRooms();
     saveInputState();
@@ -160,13 +215,58 @@ function attachEventListeners() {
     showToast("Loaded sample bill data!");
   });
 
-  elBtnRollForward.addEventListener("click", () => {
-    rollForwardNextMonth();
-  });
+  elBtnRollForward.addEventListener("click", rollForwardNextMonth);
 
   if (elBtnCopyReport) {
-    elBtnCopyReport.addEventListener("click", () => {
-      copyReportToClipboard();
+    elBtnCopyReport.addEventListener("click", copyReportToClipboard);
+  }
+
+  if (elBtnShareWa) {
+    elBtnShareWa.addEventListener("click", shareViaWhatsApp);
+  }
+
+  if (elBtnDownloadImg) {
+    elBtnDownloadImg.addEventListener("click", downloadBreakdownImage);
+  }
+
+  if (elBtnSaveHistory) {
+    elBtnSaveHistory.addEventListener("click", () => {
+      saveCurrentBillToHistory();
+      showToast("Saved bill statement to History!");
+    });
+  }
+
+  if (elBtnClearHistory) {
+    elBtnClearHistory.addEventListener("click", () => {
+      if (confirm("Clear all saved bill history?")) {
+        billHistory = [];
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(billHistory));
+        renderHistoryList();
+        showToast("Bill history cleared.");
+      }
+    });
+  }
+
+  if (elBtnExportHistoryJson) {
+    elBtnExportHistoryJson.addEventListener("click", exportHistoryToJson);
+  }
+
+  if (elBtnImportHistoryJson && elInputImportHistoryFile) {
+    elBtnImportHistoryJson.addEventListener("click", () => {
+      elInputImportHistoryFile.click();
+    });
+
+    elInputImportHistoryFile.addEventListener("change", importHistoryFromJson);
+  }
+
+  if (elBtnThemeToggle) {
+    elBtnThemeToggle.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-bs-theme") || "light";
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-bs-theme", next);
+      localStorage.setItem(THEME_KEY, next);
+      updateThemeIcon(next);
+      renderHistoryChart();
     });
   }
 
@@ -187,7 +287,7 @@ function attachEventListeners() {
 
 function resetAllInputs() {
   if (confirm("Are you sure you want to reset all input values to blank?")) {
-    appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    appState = normalizeState(JSON.parse(JSON.stringify(DEFAULT_STATE)));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
     bindFormInputs();
     renderRooms();
@@ -226,21 +326,305 @@ function loadSavedState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) {
-      // First-time user: automatically provide the reference sample dataset
       return JSON.parse(JSON.stringify(SAMPLE_REFERENCE_STATE));
     }
-    const parsed = JSON.parse(saved);
-    if (parsed.rooms) {
-      parsed.rooms.forEach(r => {
-        if (typeof r.tenants === "string") {
-          r.tenants = r.tenants.split(",").map(t => t.trim()).filter(Boolean);
-        }
-      });
-    }
-    return parsed;
+    return JSON.parse(saved);
   } catch (e) {
     return JSON.parse(JSON.stringify(SAMPLE_REFERENCE_STATE));
   }
+}
+
+// --- Bill History, Chart & JSON Backup Management ---
+function loadBillHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCurrentBillToHistory() {
+  if (!latestSummaryMetrics) return;
+  const entry = {
+    id: "hist_" + Date.now(),
+    savedAt: new Date().toLocaleString("en-MY", { dateStyle: "medium", timeStyle: "short" }),
+    periodLabel: formatElectricDate(appState.electricDate),
+    totalCollected: latestSummaryMetrics.totalCollected,
+    actualPayable: latestSummaryMetrics.actualPayable,
+    nextMonthBalance: latestSummaryMetrics.nextMonthBalance,
+    totalKwh: latestSummaryMetrics.totalKwh,
+    unitRate: latestSummaryMetrics.unitRate,
+    stateSnapshot: JSON.parse(JSON.stringify(appState))
+  };
+  billHistory.unshift(entry);
+  if (billHistory.length > 24) billHistory.pop();
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(billHistory));
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  if (!elHistoryListContainer || !elHistoryCountBadge) return;
+  elHistoryCountBadge.textContent = billHistory.length;
+
+  renderHistoryChart();
+
+  if (billHistory.length === 0) {
+    elHistoryListContainer.innerHTML = `
+      <div class="text-center text-muted py-5">
+        <i class="bi bi-journal-x fs-1 d-block mb-2"></i>
+        <p class="small mb-0">No saved bills yet. Click <strong>"Save to History"</strong> or <strong>"Roll Forward"</strong> to archive a monthly statement and unlock trend charts.</p>
+      </div>
+    `;
+    return;
+  }
+
+  elHistoryListContainer.innerHTML = "";
+  billHistory.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "card border shadow-sm p-3";
+    card.innerHTML = `
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div>
+          <strong class="text-primary d-block small">${escapeHtml(item.periodLabel)}</strong>
+          <span class="extra-small text-muted">Saved: ${escapeHtml(item.savedAt)}</span>
+        </div>
+        <span class="badge bg-warning text-dark extra-small">Carryover: RM ${(item.nextMonthBalance || 0).toFixed(2)}</span>
+      </div>
+      <div class="row g-1 extra-small text-secondary mb-2 bg-light p-2 rounded border">
+        <div class="col-6">Incurred: <strong class="text-dark">RM ${(item.actualPayable || 0).toFixed(2)}</strong></div>
+        <div class="col-6">Collected: <strong class="text-dark">RM ${(item.totalCollected || 0).toFixed(2)}</strong></div>
+        <div class="col-6">Grid: <strong>${(item.totalKwh || 0).toFixed(0)} kWh</strong></div>
+        <div class="col-6">Rate: <strong>RM ${(item.unitRate || 0).toFixed(2)}/kWh</strong></div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-primary flex-grow-1 btn-load-hist" data-idx="${index}">
+          <i class="bi bi-box-arrow-in-down-left me-1"></i> Restore Bill
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-danger btn-del-hist" data-idx="${index}" title="Delete record">
+          <i class="bi bi-trash3"></i>
+        </button>
+      </div>
+    `;
+
+    card.querySelector(".btn-load-hist").addEventListener("click", () => {
+      appState = normalizeState(JSON.parse(JSON.stringify(item.stateSnapshot)));
+      bindFormInputs();
+      renderRooms();
+      saveInputState();
+      recalculate();
+      showToast(`Restored bill: ${item.periodLabel}`);
+    });
+
+    card.querySelector(".btn-del-hist").addEventListener("click", () => {
+      billHistory.splice(index, 1);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(billHistory));
+      renderHistoryList();
+    });
+
+    elHistoryListContainer.appendChild(card);
+  });
+}
+
+function renderHistoryChart() {
+  if (!elHistoryChartCard || !elHistoryTrendCanvas || typeof Chart === "undefined") return;
+
+  if (billHistory.length === 0) {
+    elHistoryChartCard.classList.add("hidden");
+    if (historyChartInstance) {
+      historyChartInstance.destroy();
+      historyChartInstance = null;
+    }
+    return;
+  }
+
+  elHistoryChartCard.classList.remove("hidden");
+
+  const chronological = [...billHistory].slice(0, 8).reverse();
+
+  const labels = chronological.map(item => {
+    const raw = item.periodLabel || "Bill";
+    const parts = raw.split(" ");
+    if (parts.length === 3) {
+      return `${parts[1].slice(0, 3)} '${parts[2].slice(-2)}`;
+    }
+    return raw.length > 10 ? raw.slice(0, 10) : raw;
+  });
+
+  const rmValues = chronological.map(item => round2(item.actualPayable || 0));
+  const kwhValues = chronological.map(item => Math.round(item.totalKwh || 0));
+
+  const avgRm = rmValues.reduce((sum, val) => sum + val, 0) / rmValues.length;
+  if (elHistoryAvgBadge) {
+    elHistoryAvgBadge.textContent = `Avg: RM ${avgRm.toFixed(2)}/mo`;
+  }
+
+  const isDark = document.documentElement.getAttribute("data-bs-theme") === "dark";
+  const textColor = isDark ? "#cbd5e1" : "#64748b";
+  const gridColor = isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.06)";
+
+  if (historyChartInstance) {
+    historyChartInstance.destroy();
+  }
+
+  historyChartInstance = new Chart(elHistoryTrendCanvas, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          type: "bar",
+          label: "Total Bill (RM)",
+          data: rmValues,
+          backgroundColor: "rgba(37, 99, 235, 0.75)",
+          borderColor: "#2563eb",
+          borderWidth: 1,
+          borderRadius: 4,
+          yAxisID: "yRm",
+          order: 2
+        },
+        {
+          type: "line",
+          label: "Grid Usage (kWh)",
+          data: kwhValues,
+          borderColor: "#f59e0b",
+          backgroundColor: "#f59e0b",
+          borderWidth: 2,
+          pointRadius: 3,
+          tension: 0.3,
+          yAxisID: "yKwh",
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: "index",
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: "bottom",
+          labels: {
+            color: textColor,
+            boxWidth: 10,
+            font: { size: 10, family: "'Inter', sans-serif" }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              if (ctx.dataset.yAxisID === "yRm") {
+                return ` Total Bill: RM ${Number(ctx.raw).toFixed(2)}`;
+              }
+              return ` Grid Usage: ${ctx.raw} kWh`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: textColor, font: { size: 10 } },
+          grid: { display: false }
+        },
+        yRm: {
+          type: "linear",
+          position: "left",
+          beginAtZero: true,
+          ticks: {
+            color: "#2563eb",
+            font: { size: 10 },
+            callback: (val) => `RM${val}`
+          },
+          grid: { color: gridColor }
+        },
+        yKwh: {
+          type: "linear",
+          position: "right",
+          beginAtZero: true,
+          ticks: {
+            color: "#d97706",
+            font: { size: 10 },
+            callback: (val) => `${val}kWh`
+          },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  });
+}
+
+function exportHistoryToJson() {
+  const backupPayload = {
+    version: "1.0",
+    exportedAt: new Date().toISOString(),
+    currentState: appState,
+    billHistory: billHistory
+  };
+
+  const jsonString = JSON.stringify(backupPayload, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  const dateStamp = new Date().toISOString().split("T")[0];
+  link.href = url;
+  link.download = `utility-splitter-backup-${dateStamp}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showToast("Downloaded JSON backup file!");
+}
+
+function importHistoryFromJson(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+
+      const importedHistory = Array.isArray(parsed)
+        ? parsed
+        : (Array.isArray(parsed.billHistory) ? parsed.billHistory : null);
+
+      if (!importedHistory && !parsed.currentState) {
+        showToast("Invalid backup JSON format.");
+        return;
+      }
+
+      if (importedHistory && importedHistory.length > 0) {
+        const existingIds = new Set(billHistory.map(item => item.id));
+        const newRecords = importedHistory.filter(item => item && item.id && !existingIds.has(item.id));
+        billHistory = [...newRecords, ...billHistory].slice(0, 24);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(billHistory));
+      }
+
+      if (parsed.currentState && typeof parsed.currentState === "object") {
+        appState = normalizeState(parsed.currentState);
+        bindFormInputs();
+        renderRooms();
+        saveInputState();
+        recalculate();
+      }
+
+      renderHistoryList();
+      showToast("Successfully imported backup data!");
+    } catch (err) {
+      console.error("Failed to import JSON:", err);
+      showToast("Error reading JSON backup file.");
+    } finally {
+      event.target.value = "";
+    }
+  };
+
+  reader.readAsText(file);
 }
 
 // --- Date Formatting Helpers ---
@@ -276,9 +660,7 @@ function formatWaterPeriod(startStr, endStr) {
       const mName2 = date2.toLocaleDateString("en-US", { month: "long" });
 
       if (y1 === y2) {
-        if (m1 === m2) {
-          return `${mName1} ${y1}`;
-        }
+        if (m1 === m2) return `${mName1} ${y1}`;
         return `${mName1} to ${mName2} ${y1}`;
       }
       return `${mName1} ${y1} to ${mName2} ${y2}`;
@@ -289,7 +671,7 @@ function formatWaterPeriod(startStr, endStr) {
   }
 }
 
-/// --- Room Rendering ---
+// --- Room Rendering ---
 function renderRooms() {
   elRoomsContainer.innerHTML = "";
 
@@ -444,8 +826,9 @@ function recalculate() {
   let unitRate = 0;
   if (rateMode === "manual") {
     unitRate = manualRate;
+  } else if (rateMode === "exact") {
+    unitRate = rawRate;
   } else {
-    // ceil
     unitRate = Math.ceil(rawRate * 100) / 100;
   }
 
@@ -460,7 +843,9 @@ function recalculate() {
     const kwh = Math.max(0, c - p);
     totalRoomKwh += kwh;
 
-    const validTenants = Array.isArray(r.tenants) ? r.tenants.map(t => t.trim()).filter(Boolean) : [];
+    const validTenants = Array.isArray(r.tenants)
+      ? r.tenants.map(t => (typeof t === "object" && t !== null ? (t.name || "") : String(t || "")).trim()).filter(Boolean)
+      : [];
     const tenantCount = validTenants.length > 0 ? validTenants.length : 1;
     totalHeadcount += validTenants.length;
 
@@ -512,7 +897,8 @@ function recalculate() {
   const nextMonthBalance = Math.max(0, totalCollected - actualPayable);
 
   // 4. Update UI Displays
-  elDispUnitRate.innerHTML = `RM ${unitRate.toFixed(2)}<span class="fs-6 text-muted">/kWh</span>`;
+  const rateDecimals = rateMode === "exact" ? 4 : 2;
+  elDispUnitRate.innerHTML = `RM ${unitRate.toFixed(rateDecimals)}<span class="fs-6 text-muted">/kWh</span>`;
   elDispNetElectric.textContent = `Net: RM ${netElectric.toFixed(2)} (raw: ${rawRate.toFixed(4)})`;
   elDispCommonPerPerson.textContent = `RM ${round2(commonCostPerPerson).toFixed(2)}`;
   elDispCommonKwh.textContent = `${commonKwh.toFixed(0)} kWh / ${totalHeadcount} pax`;
@@ -546,7 +932,7 @@ function recalculate() {
   );
 
   if (elMiniDocPeriod) elMiniDocPeriod.textContent = electricFormattedDate;
-  if (elMiniDocRate) elMiniDocRate.textContent = `RM ${unitRate.toFixed(2)}/kWh`;
+  if (elMiniDocRate) elMiniDocRate.textContent = `RM ${unitRate.toFixed(rateDecimals)}/kWh`;
   if (elMiniDocGrid) elMiniDocGrid.textContent = `${totalKwh.toFixed(0)} kWh`;
   if (elMiniDocWater) elMiniDocWater.textContent = `RM ${round2(waterCostPerPerson).toFixed(2)}/pax`;
   if (elMiniDocBalance) elMiniDocBalance.textContent = `RM ${nextMonthBalance.toFixed(2)}`;
@@ -565,8 +951,7 @@ function recalculate() {
     });
   }
 
-  // 5. Generate Formatted WhatsApp Text for Copy Function
-  generateFormattedReport({
+  latestSummaryMetrics = {
     electricPeriod: electricFormattedDate,
     waterPeriod: waterFormattedPeriod,
     electricAmount,
@@ -584,7 +969,10 @@ function recalculate() {
     totalCollected,
     actualPayable,
     nextMonthBalance
-  });
+  };
+
+  // 5. Generate Formatted WhatsApp Text for Copy & Share Functions
+  generateFormattedReport(latestSummaryMetrics);
 }
 
 function generateFormattedReport(data) {
@@ -628,8 +1016,9 @@ function rollForwardNextMonth() {
     ? `- Previous Balance deduction will be set to RM ${currentBalance.toFixed(2)}`
     : `- No balance to carry down (Prev. Balance set to RM 0.00)`;
   
-  if (confirm(`Roll forward to next month?\n\n${balanceMsg}\n- Room Previous Meters updated to current readings\n- Electric bill, Water bill, Total Grid Usage, and Current Meter readings cleared for new input!`)) {
-    // Carry down balance deduction if > 0, otherwise clear input with placeholder 0.00
+  if (confirm(`Roll forward to next month?\n\n- Current bill will be automatically archived to Bill History\n${balanceMsg}\n- Room Previous Meters updated to current readings\n- Electric bill, Water bill, Total Grid Usage, and Current Meter readings cleared for new input!`)) {
+    saveCurrentBillToHistory();
+
     if (currentBalance > 0) {
       appState.prevBalance = currentBalance.toFixed(2);
     } else {
@@ -654,8 +1043,36 @@ function rollForwardNextMonth() {
     renderRooms();
     saveInputState();
     recalculate();
-    showToast("Rolled forward to next month successfully!");
+    showToast("Archived bill & rolled forward to next month!");
   }
+}
+
+function shareViaWhatsApp() {
+  if (!latestFormattedReport) {
+    showToast("No report data available to share.");
+    return;
+  }
+  const encoded = encodeURIComponent(latestFormattedReport);
+  window.open(`https://wa.me/?text=${encoded}`, "_blank");
+}
+
+function downloadBreakdownImage() {
+  const target = document.getElementById("captureBreakdownCard");
+  if (!target || typeof html2canvas === "undefined") {
+    showToast("Image export library is still loading.");
+    return;
+  }
+  showToast("Generating PNG image...");
+  html2canvas(target, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+    const link = document.createElement("a");
+    const periodSlug = (elElectricDate && elElectricDate.value) ? elElectricDate.value : "statement";
+    link.download = `utility-bill-${periodSlug}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    showToast("Downloaded PNG breakdown image!");
+  }).catch(() => {
+    showToast("Failed to generate image.");
+  });
 }
 
 function copyReportToClipboard() {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -23,7 +23,7 @@
 </head>
 <body class="bg-light">
   <div class="container py-4">
-    <!-- Header -->
+    <!-- Top Navbar Header -->
     <header class="navbar navbar-expand-lg bg-white rounded-3 shadow-sm p-3 mb-4 border d-flex flex-wrap justify-content-between align-items-center gap-3">
       <div class="d-flex align-items-center gap-3">
         <img src="favicon.svg" alt="Utility Calculator Logo" class="brand-logo-img" width="48" height="48" />
@@ -32,29 +32,119 @@
           <p class="text-muted small mb-0">Electricity & Water Bill Splitter with Sub-Meter & Balance Carryover</p>
         </div>
       </div>
-      <div class="d-flex flex-wrap gap-2">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <button id="btnThemeToggle" class="btn btn-outline-secondary btn-sm" title="Toggle Light/Dark Mode">
+          <i class="bi bi-moon-stars" id="themeIcon"></i>
+        </button>
+        <button class="btn btn-outline-primary btn-sm position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#historyOffcanvas" aria-controls="historyOffcanvas" title="View saved past bills">
+          <i class="bi bi-clock-history me-1"></i> Bill History
+          <span id="historyCountBadge" class="badge rounded-pill bg-primary ms-1">0</span>
+        </button>
         <button id="btnResetAll" class="btn btn-outline-danger btn-sm" title="Reset all input fields to blank">
           <i class="bi bi-trash3 me-1"></i> Reset All Values
         </button>
         <button id="btnLoadSample" class="btn btn-outline-primary btn-sm" title="Load sample bill data for preview and testing">
           <i class="bi bi-arrow-repeat me-1"></i> Load Sample Data
         </button>
-        <button id="btnRollForward" class="btn btn-primary btn-sm shadow-sm" title="Use current ending balance & readings for next month">
+        <button id="btnRollForward" class="btn btn-primary btn-sm shadow-sm" title="Archive current bill & shift readings to next month">
           <i class="bi bi-fast-forward me-1"></i> Roll Forward to Next Month
         </button>
       </div>
     </header>
 
+    <!-- SplitWatt-Style Hero & Feature Strip -->
+    <section class="hero-banner rounded-3 p-4 mb-4 border shadow-sm bg-white">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <span class="badge bg-primary-subtle text-primary fw-semibold mb-2 px-3 py-1 rounded-pill">
+            <i class="bi bi-lightning-charge-fill me-1"></i> Fair Roommate Utility Splitting
+          </span>
+          <h2 class="h3 fw-extrabold text-dark mb-2">Split electricity & water bills fairly among roommates</h2>
+          <p class="text-secondary small mb-3">
+            Use room AC sub-meter readings to calculate each tenant's exact share. Automatically handle common area costs, carryover balances, billing history, and export statements in seconds.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="#calculatorSection" class="btn btn-primary btn-sm px-3 fw-semibold shadow-sm">
+              <i class="bi bi-calculator me-1"></i> Split a Bill Now
+            </a>
+            <button class="btn btn-outline-secondary btn-sm px-3" type="button" data-bs-toggle="collapse" data-bs-target="#howItWorksCollapse" aria-expanded="false">
+              <i class="bi bi-info-circle me-1"></i> See How It Works
+            </button>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="feature-mini-card p-2 rounded border bg-light h-100">
+                <i class="bi bi-speedometer2 text-primary fw-bold me-1"></i>
+                <strong class="extra-small text-dark">Sub-Meter Tracking</strong>
+                <p class="extra-small text-muted mb-0 mt-1">Auto-calculates individual room AC kWh usage.</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="feature-mini-card p-2 rounded border bg-light h-100">
+                <i class="bi bi-pie-chart text-primary fw-bold me-1"></i>
+                <strong class="extra-small text-dark">Common Area Split</strong>
+                <p class="extra-small text-muted mb-0 mt-1">Splits shared electricity & water equally across tenants.</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="feature-mini-card p-2 rounded border bg-light h-100">
+                <i class="bi bi-arrow-left-right text-primary fw-bold me-1"></i>
+                <strong class="extra-small text-dark">Auto Reading Shift</strong>
+                <p class="extra-small text-muted mb-0 mt-1">One-click roll forward shifts meters & balance.</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="feature-mini-card p-2 rounded border bg-light h-100">
+                <i class="bi bi-whatsapp text-success fw-bold me-1"></i>
+                <strong class="extra-small text-dark">PDF, Image & WhatsApp</strong>
+                <p class="extra-small text-muted mb-0 mt-1">Export clean statements or share in one tap.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible How It Works -->
+      <div class="collapse mt-4 pt-3 border-top" id="howItWorksCollapse">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="p-3 rounded border bg-light h-100">
+              <span class="step-badge mb-2">1</span>
+              <h3 class="h6 fw-bold text-dark">Add Bill Details</h3>
+              <p class="extra-small text-muted mb-0">Enter your electric bill, water bill, previous month carryover balance, and total grid kWh.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border bg-light h-100">
+              <span class="step-badge mb-2">2</span>
+              <h3 class="h6 fw-bold text-dark">Add Sub-Meters & Tenants</h3>
+              <p class="extra-small text-muted mb-0">Input previous and current room AC meter readings along with tenant names for each room.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 rounded border bg-light h-100">
+              <span class="step-badge mb-2">3</span>
+              <h3 class="h6 fw-bold text-dark">Save & Share Results</h3>
+              <p class="extra-small text-muted mb-0">Save to Bill History, export as an official A4 PDF or PNG image, or share directly to WhatsApp.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Main Grid Layout -->
-    <main class="row g-4">
+    <main class="row g-4" id="calculatorSection">
       <!-- Left Column: Inputs -->
       <section class="col-lg-6 col-12 d-flex flex-column gap-4">
         <!-- 1. Utility Invoices Card -->
         <div class="card shadow-sm border">
-          <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
             <h2 class="h5 mb-0 fw-bold text-dark d-flex align-items-center">
               <span class="step-badge me-2">1</span> Utility Bill Summary
             </h2>
+            <span class="badge bg-light text-secondary border extra-small">Main Grid & Water</span>
           </div>
           <div class="card-body p-4">
             <div class="row g-3 mb-3">
@@ -109,6 +199,7 @@
                 <label for="rateMode" class="form-label fw-semibold small text-secondary">Rate Calculation Strategy</label>
                 <select id="rateMode" class="form-select">
                   <option value="ceil" selected>Ceil / Round Up - Standard House Rule</option>
+                  <option value="exact">Exact Rate (No Rounding)</option>
                   <option value="manual">Manual Fixed Rate</option>
                 </select>
               </div>
@@ -170,12 +261,15 @@
           </div>
         </div>
 
-        <!-- Tenant Breakdown Table -->
-        <div class="card shadow-sm border">
-          <div class="card-header bg-white py-3 border-bottom">
+        <!-- 3. Tenant Breakdown Table (Capturable for Image Export) -->
+        <div class="card shadow-sm border" id="captureBreakdownCard">
+          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h2 class="h5 mb-0 fw-bold text-dark d-flex align-items-center">
               <span class="step-badge me-2">3</span> Individual Tenant Breakdown
             </h2>
+            <button id="btnSaveHistory" class="btn btn-outline-primary btn-sm" title="Save this bill calculation to browser history">
+              <i class="bi bi-bookmark-plus me-1"></i> Save to History
+            </button>
           </div>
           <div class="card-body p-0">
             <div class="table-responsive">
@@ -224,13 +318,19 @@
           </div>
         </div>
 
-        <!-- 4. Report & PDF Invoice Card -->
+        <!-- 4. Report, Image, WhatsApp & PDF Statement Card -->
         <div class="card shadow-sm border">
           <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h2 class="h5 mb-0 fw-bold text-dark d-flex align-items-center">
-              <span class="step-badge me-2">4</span> PDF Invoice Statement
+              <span class="step-badge me-2">4</span> Export & Share Statement
             </h2>
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-wrap gap-2">
+              <button id="btnShareWa" class="btn btn-success btn-sm shadow-sm" title="Share formatted summary directly to WhatsApp">
+                <i class="bi bi-whatsapp me-1"></i> WhatsApp
+              </button>
+              <button id="btnDownloadImg" class="btn btn-outline-primary btn-sm" title="Download PNG image of breakdown">
+                <i class="bi bi-image me-1"></i> Save Image
+              </button>
               <button id="btnOpenPdf" class="btn btn-primary btn-sm shadow-sm" title="Open and export PDF invoice in a new tab">
                 <i class="bi bi-file-earmark-pdf me-1"></i> Export to PDF
               </button>
@@ -279,10 +379,66 @@
       </section>
     </main>
 
+    <!-- Bill History Offcanvas Drawer -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="historyOffcanvas" aria-labelledby="historyOffcanvasLabel" style="width: 460px; max-width: 100vw;">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold text-primary d-flex align-items-center gap-2" id="historyOffcanvasLabel">
+          <i class="bi bi-clock-history"></i> Saved Bill History & Trends
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body d-flex flex-column justify-content-between">
+        <div>
+          <!-- Monthly Spending & Usage Trend Chart Card -->
+          <div id="historyChartCard" class="card border shadow-sm p-3 mb-3 hidden">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="extra-small fw-bold text-uppercase text-secondary">
+                <i class="bi bi-graph-up-arrow text-primary me-1"></i> Monthly RM & kWh Trend
+              </span>
+              <span class="badge bg-primary-subtle text-primary extra-small" id="historyAvgBadge">Avg: RM 0.00</span>
+            </div>
+            <div style="height: 190px; position: relative;">
+              <canvas id="historyTrendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Saved Bill Cards List -->
+          <div id="historyListContainer" class="d-flex flex-column gap-3">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <div class="border-top pt-3 mt-3 d-flex flex-column gap-2">
+          <div class="d-flex gap-2">
+            <button id="btnExportHistoryJson" class="btn btn-outline-primary btn-sm flex-grow-1" title="Download backup JSON of all saved history and current bill">
+              <i class="bi bi-download me-1"></i> Backup JSON
+            </button>
+            <button id="btnImportHistoryJson" class="btn btn-outline-secondary btn-sm flex-grow-1" title="Restore history from a JSON backup file">
+              <i class="bi bi-upload me-1"></i> Import JSON
+            </button>
+            <input type="file" id="inputImportHistoryFile" accept=".json,application/json" class="hidden" />
+          </div>
+          <button id="btnClearHistory" class="btn btn-outline-danger btn-sm w-100">
+            <i class="bi bi-trash3 me-1"></i> Clear All Saved History
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 pt-4 border-top text-center text-muted small">
+      <p class="mb-1"><strong>House Utility Bill Calculator</strong> — Electricity & Water Bill Splitter</p>
+      <p class="extra-small mb-0">Data stays locally in your browser. Free & open source.</p>
+    </footer>
+
     <!-- Toast Notification -->
     <div id="toast" class="toast-popup">Copied to clipboard!</div>
   </div>
 
+  <!-- html2canvas CDN for PNG Image Export -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- Chart.js CDN for Spending & kWh Trend Visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <!-- Bootstrap 5 JS Bundle CDN -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="app.js"></script>

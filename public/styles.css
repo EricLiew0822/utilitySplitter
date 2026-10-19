@@ -8,6 +8,11 @@ body {
   font-family: var(--font-sans);
   background-color: #f8fafc !important;
   color: #0f172a;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.fw-extrabold {
+  font-weight: 800;
 }
 
 .brand-logo-img {
@@ -40,6 +45,20 @@ body {
 
 .hidden {
   display: none !important;
+}
+
+/* Hero Banner & Feature Cards */
+.hero-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+}
+
+.feature-mini-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.feature-mini-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
 }
 
 /* Tenant Breakdown Table */
@@ -93,6 +112,33 @@ body {
   opacity: 1;
 }
 
+/* Dark Theme Support (Preserving Primary Brand Color) */
+[data-bs-theme="dark"] body {
+  background-color: #0f172a !important;
+  color: #f8fafc;
+}
+
+[data-bs-theme="dark"] .bg-white,
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .navbar {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .bg-light,
+[data-bs-theme="dark"] .table-light {
+  background-color: #0f172a !important;
+  color: #cbd5e1 !important;
+}
+
+[data-bs-theme="dark"] .text-dark {
+  color: #f8fafc !important;
+}
+
+[data-bs-theme="dark"] .hero-banner {
+  background: linear-gradient(135deg, #1e293b 0%, #172554 100%);
+}
+
 /* Toast Popup */
 .toast-popup {
   position: fixed;
@@ -109,7 +155,7 @@ body {
   transform: translateY(20px);
   transition: all 0.3s ease;
   pointer-events: none;
-  z-index: 1055;
+  z-index: 1080;
 }
 
 .toast-popup.show {

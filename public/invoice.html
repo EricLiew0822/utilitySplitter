@@ -543,7 +543,9 @@
       // Effective Rate
       const netElectric = Math.max(0, electricAmount - prevBalance);
       const rawRate = totalKwh > 0 ? netElectric / totalKwh : 0;
-      let unitRate = (rateMode === "manual") ? manualRate : Math.ceil(rawRate * 100) / 100;
+      let unitRate = (rateMode === "manual")
+        ? manualRate
+        : (rateMode === "exact" ? rawRate : Math.ceil(rawRate * 100) / 100);
 
       // Aggregations
       let totalHeadcount = 0;
@@ -558,7 +560,7 @@
 
         const roomName = (r.name && r.name.trim()) ? r.name.trim() : `Room ${idx + 1}`;
         const tenantList = (Array.isArray(r.tenants) ? r.tenants : [r.tenants])
-          .map(t => (typeof t === "string" ? t.trim() : ""))
+          .map(t => (typeof t === "object" && t !== null ? (t.name || "") : String(t || "")).trim())
           .filter(Boolean);
 
         const effectiveTenants = tenantList.length > 0 ? tenantList : [`Tenant ${totalHeadcount + 1}`];
@@ -613,7 +615,7 @@
       document.getElementById("docGrossElec").textContent = `RM ${electricAmount.toFixed(2)}`;
       document.getElementById("docPrevBalance").textContent = `- RM ${prevBalance.toFixed(2)}`;
       document.getElementById("docTotalKwh").textContent = `${totalKwh.toFixed(0)} kWh`;
-      document.getElementById("docUnitRate").textContent = `RM ${unitRate.toFixed(2)} / kWh`;
+      document.getElementById("docUnitRate").textContent = `RM ${unitRate.toFixed(rateMode === "exact" ? 4 : 2)} / kWh`;
 
       document.getElementById("docWaterPeriod").textContent = waterPeriodStr;
       document.getElementById("docWaterAmount").textContent = `RM ${waterAmount.toFixed(2)}`;
