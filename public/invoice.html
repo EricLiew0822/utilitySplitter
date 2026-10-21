@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>House Utility Bill Invoice - PDF Report</title>
+  <title>House Utility Bill Invoice - Official Statement</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <style>
     :root {
-      --primary: #1e3a8a;
-      --accent: #2563eb;
+      --primary: #0d47a1;
+      --accent: #1976d2;
       --text: #0f172a;
       --text-muted: #64748b;
-      --border: #e2e8f0;
-      --bg: #f8fafc;
+      --border: #cbd5e1;
+      --bg: #f6fafe;
       --highlight: #fef08a;
     }
 
@@ -33,7 +33,6 @@
       line-height: 1.5;
     }
 
-    /* Print Toolbar */
     .print-toolbar {
       max-width: 800px;
       margin: 0 auto 20px auto;
@@ -59,11 +58,11 @@
     .btn-primary {
       background: var(--accent);
       color: #ffffff;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 4px 6px -1px rgba(25, 118, 210, 0.25);
     }
 
     .btn-primary:hover {
-      background: #1d4ed8;
+      background: var(--primary);
     }
 
     .btn-secondary {
@@ -72,11 +71,6 @@
       border: 1px solid var(--border);
     }
 
-    .btn-secondary:hover {
-      background: #f1f5f9;
-    }
-
-    /* A4 Paper Container */
     .invoice-paper {
       max-width: 800px;
       margin: 0 auto;
@@ -87,7 +81,6 @@
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
     }
 
-    /* Header */
     .invoice-header {
       display: flex;
       justify-content: space-between;
@@ -126,8 +119,8 @@
 
     .meta-badge {
       display: inline-block;
-      background: #eff6ff;
-      color: var(--accent);
+      background: #e3f2fd;
+      color: var(--primary);
       padding: 4px 10px;
       border-radius: 6px;
       font-weight: 700;
@@ -141,7 +134,6 @@
       color: var(--text-muted);
     }
 
-    /* Section Boxes */
     .section-title {
       font-size: 0.95rem;
       font-weight: 800;
@@ -176,19 +168,6 @@
       margin-bottom: 6px;
     }
 
-    .info-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .info-row span:first-child {
-      white-space: nowrap;
-    }
-
-    #docCommonKwh {
-      text-align: left !important;
-      white-space: nowrap;
-    }
-
     .info-row.highlight {
       font-weight: 700;
       color: var(--accent);
@@ -197,7 +176,6 @@
       margin-top: 6px;
     }
 
-    /* Tables */
     .table-section {
       margin-bottom: 24px;
     }
@@ -214,36 +192,20 @@
       padding: 10px 12px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
-      box-sizing: border-box;
-      line-height: 1.4;
     }
 
     th {
-      background: #f1f5f9;
+      background: #e3f2fd;
       font-weight: 700;
-      color: #334155;
+      color: var(--primary);
       font-size: 0.8rem;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
-      word-break: break-word;
       text-align: center;
     }
 
-    td {
-      text-align: left;
-    }
-
-    .text-right {
-      text-align: right !important;
-    }
-
-    .text-left {
-      text-align: left !important;
-    }
-
-    .text-center {
-      text-align: center !important;
-    }
+    .text-right { text-align: right !important; }
+    .text-left { text-align: left !important; }
+    .text-center { text-align: center !important; }
 
     .tenant-badge {
       font-weight: 700;
@@ -258,12 +220,6 @@
       color: #78350f;
     }
 
-    /* Room Table */
-    .room-table th {
-      background: #fafafa;
-    }
-
-    /* Reconciliation Box */
     .summary-card {
       background: #f8fafc;
       border: 2px solid #cbd5e1;
@@ -298,7 +254,7 @@
     .summary-val {
       font-size: 1.2rem;
       font-weight: 800;
-      color: var(--text);
+      color: var(--primary);
     }
 
     .summary-item.balance-item {
@@ -306,15 +262,10 @@
       border-color: #fde047;
     }
 
-    .summary-item.balance-item .summary-val {
-      color: #854d0e;
-    }
-
     .carryover-note {
       font-size: 0.8rem;
       color: #64748b;
       text-align: center;
-      line-height: 1.4;
     }
 
     .footer-note {
@@ -326,51 +277,27 @@
       text-align: center;
     }
 
-    /* Print Styles */
     @media print {
-      body {
-        background: #ffffff;
-        padding: 0;
-      }
-
-      .print-toolbar {
-        display: none !important;
-      }
-
-      .invoice-paper {
-        border: none;
-        box-shadow: none;
-        padding: 0;
-        max-width: 100%;
-      }
-
-      @page {
-        margin: 15mm;
-        size: A4 portrait;
-      }
+      body { background: #ffffff; padding: 0; }
+      .print-toolbar { display: none !important; }
+      .invoice-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+      @page { margin: 15mm; size: A4 portrait; }
     }
   </style>
 </head>
 <body>
-  <!-- Print Control Bar -->
   <div class="print-toolbar">
-    <a href="index.html" class="btn btn-secondary">
-      ← Back to Calculator
-    </a>
-    <button onclick="window.print()" class="btn btn-primary">
-      🖨️ Save as PDF / Print
-    </button>
+    <a href="index.html" class="btn btn-secondary">← Back to Calculator</a>
+    <button onclick="window.print()" class="btn btn-primary">🖨️ Save as PDF / Print</button>
   </div>
 
-  <!-- A4 Invoice Document -->
   <div class="invoice-paper" id="invoicePaper">
-    <!-- Header -->
     <div class="invoice-header">
       <div class="brand-title">
         <img src="favicon.svg" alt="Logo" />
         <div>
           <h1>Utility Bill Statement</h1>
-          <p>Shared House Electricity & Water Billing</p>
+          <p>Shared House Electricity &amp; Water Billing</p>
         </div>
       </div>
       <div class="invoice-meta">
@@ -379,68 +306,28 @@
       </div>
     </div>
 
-    <!-- 1. General Invoice & Rate Details -->
-    <div class="section-title">1. Utility Invoices & Effective Rate</div>
+    <div class="section-title">1. Utility Invoices &amp; Effective Rate</div>
     <div class="grid-2">
       <div class="info-card">
-        <div class="info-row">
-          <span>Electric Bill Due Date:</span>
-          <strong id="docElecDate">-</strong>
-        </div>
-        <div class="info-row">
-          <span>Gross Electric Bill:</span>
-          <strong id="docGrossElec">RM 0.00</strong>
-        </div>
-        <div class="info-row">
-          <span>Less Prev. Balance:</span>
-          <span id="docPrevBalance">- RM 0.00</span>
-        </div>
-        <div class="info-row">
-          <span>Total Grid Consumption:</span>
-          <span id="docTotalKwh">0 kWh</span>
-        </div>
-        <div class="info-row highlight">
-          <span>Effective Electricity Rate:</span>
-          <strong id="docUnitRate">RM 0.00 / kWh</strong>
-        </div>
+        <div class="info-row"><span>Electric Bill Due Date:</span><strong id="docElecDate">-</strong></div>
+        <div class="info-row"><span>Gross Electric Bill:</span><strong id="docGrossElec">RM 0.00</strong></div>
+        <div class="info-row"><span>Less Prev. Balance:</span><span id="docPrevBalance">- RM 0.00</span></div>
+        <div class="info-row"><span>Total Grid Consumption:</span><span id="docTotalKwh">0 kWh</span></div>
+        <div class="info-row highlight"><span>Effective Electricity Rate:</span><strong id="docUnitRate">RM 0.00 / kWh</strong></div>
       </div>
 
       <div class="info-card">
-        <div class="info-row">
-          <span>Water Bill Period:</span>
-          <strong id="docWaterPeriod">-</strong>
-        </div>
-        <div class="info-row">
-          <span>Total Water Bill:</span>
-          <strong id="docWaterAmount">RM 0.00</strong>
-        </div>
-        <div class="info-row">
-          <span>Total House Headcount:</span>
-          <strong id="docHeadcount">0 Tenants</strong>
-        </div>
-        <div class="info-row">
-          <span>Common Area Electricity:</span>
-          <span id="docCommonKwh" class="text-left" style="text-align: left !important; display: inline-block;">0 kWh (RM 0.00/pax)</span>
-        </div>
-        <div class="info-row highlight">
-          <span>Water Share Per Tenant:</span>
-          <strong id="docWaterPerPerson">RM 0.00 / pax</strong>
-        </div>
+        <div class="info-row"><span>Water Bill Period:</span><strong id="docWaterPeriod">-</strong></div>
+        <div class="info-row"><span>Total Water Bill:</span><strong id="docWaterAmount">RM 0.00</strong></div>
+        <div class="info-row"><span>Total House Headcount:</span><strong id="docHeadcount">0 Tenants</strong></div>
+        <div class="info-row"><span>Common Area Electricity:</span><span id="docCommonKwh">0 kWh (RM 0.00/pax)</span></div>
+        <div class="info-row highlight"><span>Water Share Per Tenant:</span><strong id="docWaterPerPerson">RM 0.00 / pax</strong></div>
       </div>
     </div>
 
-    <!-- 2. Room Sub-meter Usages -->
     <div class="section-title">2. Room Air-Conditioner Sub-Meters</div>
     <div class="table-section">
       <table>
-        <colgroup>
-          <col style="width: 20%;" />
-          <col style="width: 15%;" />
-          <col style="width: 20%;" />
-          <col style="width: 15%;" />
-          <col style="width: 14%;" />
-          <col style="width: 16%;" />
-        </colgroup>
         <thead>
           <tr>
             <th class="text-left">Room</th>
@@ -448,44 +335,30 @@
             <th class="text-center">Current Meter</th>
             <th class="text-center">Usage (kWh)</th>
             <th class="text-center">Total AC Cost</th>
-            <th class="text-center">Per Tenant Share</th>
+            <th class="text-right">Per Tenant Share</th>
           </tr>
         </thead>
-        <tbody id="docRoomTableBody">
-          <!-- Populated dynamically -->
-        </tbody>
+        <tbody id="docRoomTableBody"></tbody>
       </table>
     </div>
 
-    <!-- 3. Individual Tenant Payable Breakdown -->
     <div class="section-title">3. Individual Tenant Payable Breakdown</div>
     <div class="table-section">
       <table>
-        <colgroup>
-          <col style="width: 20%;" />
-          <col style="width: 15%;" />
-          <col style="width: 20%;" />
-          <col style="width: 15%;" />
-          <col style="width: 14%;" />
-          <col style="width: 16%;" />
-        </colgroup>
         <thead>
           <tr>
             <th class="text-left">Tenant Name</th>
             <th class="text-center">Room</th>
-            <th class="text-center">COMMON ELECTRICITY</th>
+            <th class="text-center">Common Electricity</th>
             <th class="text-center">Room AC</th>
             <th class="text-center">Water</th>
-            <th class="text-center">Total Payable</th>
+            <th class="text-right">Total Payable</th>
           </tr>
         </thead>
-        <tbody id="docTenantTableBody">
-          <!-- Populated dynamically -->
-        </tbody>
+        <tbody id="docTenantTableBody"></tbody>
       </table>
     </div>
 
-    <!-- 4. Financial Summary & Carryover -->
     <div class="summary-card">
       <div class="summary-grid">
         <div class="summary-item">
@@ -506,28 +379,21 @@
       </p>
     </div>
 
-    <!-- Footer -->
     <div class="footer-note">
-      This statement was computer-generated by House Utility Bill Calculator.
+      This statement was computer-generated by UtilitySplit — House Utility Bill Calculator.
     </div>
   </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      loadInvoiceData();
-    });
-
-    function loadInvoiceData() {
-      const saved = localStorage.getItem("utility_calculator_user_data") || localStorage.getItem("bill_calc_state_v4") || localStorage.getItem("bill_calc_state_v2") || localStorage.getItem("bill_calc_state");
+      const saved = localStorage.getItem("utility_calculator_user_data");
       if (!saved) return;
-      
       try {
-        const state = JSON.parse(saved);
-        renderInvoice(state);
+        renderInvoice(JSON.parse(saved));
       } catch (e) {
         console.error("Failed to parse invoice state:", e);
       }
-    }
+    });
 
     function renderInvoice(state) {
       const elecDateStr = formatElectricDate(state.electricDate);
@@ -540,14 +406,12 @@
       const rateMode = state.rateMode || "ceil";
       const manualRate = parseFloat(state.manualRate) || 0;
 
-      // Effective Rate
       const netElectric = Math.max(0, electricAmount - prevBalance);
       const rawRate = totalKwh > 0 ? netElectric / totalKwh : 0;
       let unitRate = (rateMode === "manual")
         ? manualRate
         : (rateMode === "exact" ? rawRate : Math.ceil(rawRate * 100) / 100);
 
-      // Aggregations
       let totalHeadcount = 0;
       let totalRoomKwh = 0;
       const roomCalculations = [];
@@ -573,9 +437,9 @@
           name: roomName,
           prevMeter: prev,
           currMeter: curr,
-          kwh: kwh,
-          roomCost: roomCost,
-          perTenantAc: perTenantAc,
+          kwh,
+          roomCost,
+          perTenantAc,
           tenants: effectiveTenants
         });
       });
@@ -584,7 +448,6 @@
       const commonCostPerPerson = totalHeadcount > 0 ? ((commonKwh * unitRate) / totalHeadcount) : 0;
       const waterCostPerPerson = totalHeadcount > 0 ? (waterAmount / totalHeadcount) : 0;
 
-      // Tenant Rows
       const tenantRows = [];
       roomCalculations.forEach(r => {
         r.tenants.forEach(t => {
@@ -595,7 +458,7 @@
             common: commonCostPerPerson,
             roomAc: r.perTenantAc,
             water: waterCostPerPerson,
-            total: total
+            total
           });
         });
       });
@@ -604,13 +467,8 @@
       const actualPayable = electricAmount + waterAmount;
       const nextMonthBalance = Math.max(0, totalCollected - actualPayable);
 
-      // Populate DOM Elements
       const now = new Date();
-      const day = String(now.getDate()).padStart(2, "0");
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const month = monthNames[now.getMonth()];
-      const year = now.getFullYear();
-      document.getElementById("docGeneratedDate").textContent = `Generated: ${day} ${month} ${year}`;
+      document.getElementById("docGeneratedDate").textContent = `Generated: ${now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}`;
       document.getElementById("docElecDate").textContent = elecDateStr;
       document.getElementById("docGrossElec").textContent = `RM ${electricAmount.toFixed(2)}`;
       document.getElementById("docPrevBalance").textContent = `- RM ${prevBalance.toFixed(2)}`;
@@ -623,7 +481,6 @@
       document.getElementById("docCommonKwh").textContent = `${commonKwh.toFixed(0)} kWh (RM ${commonCostPerPerson.toFixed(2)}/pax)`;
       document.getElementById("docWaterPerPerson").textContent = `RM ${waterCostPerPerson.toFixed(2)} / pax`;
 
-      // Room Table
       const roomTbody = document.getElementById("docRoomTableBody");
       roomTbody.innerHTML = "";
       roomCalculations.forEach(r => {
@@ -639,7 +496,6 @@
         roomTbody.appendChild(tr);
       });
 
-      // Tenant Table
       const tenantTbody = document.getElementById("docTenantTableBody");
       tenantTbody.innerHTML = "";
       tenantRows.forEach(t => {
@@ -655,7 +511,6 @@
         tenantTbody.appendChild(tr);
       });
 
-      // Summary
       document.getElementById("docTotalCollected").textContent = `RM ${totalCollected.toFixed(2)}`;
       document.getElementById("docActualPayable").textContent = `RM ${actualPayable.toFixed(2)}`;
       document.getElementById("docNextBalance").textContent = `RM ${nextMonthBalance.toFixed(2)}`;

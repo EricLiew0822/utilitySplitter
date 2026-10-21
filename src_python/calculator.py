@@ -13,7 +13,7 @@ class Room:
     name: str              # e.g., "大房", "Master Room"
     prev_meter: float      # e.g., 5574
     curr_meter: float      # e.g., 5774
-    tenants: List[str]     # e.g., ["Bryan", "Lim"]
+    tenants: List[str]     # e.g., ["Bryan", "Thomas"]
 
     @property
     def kwh_used(self) -> float:
@@ -381,9 +381,9 @@ if __name__ == "__main__":
             total_kwh=477.0,
             water_amount=7.00,
             rooms=[
-                Room(name="Master", prev_meter=5574, curr_meter=5774, tenants=["Bryan", "Lim"]),
+                Room(name="Master", prev_meter=5574, curr_meter=5774, tenants=["Bryan", "Thomas"]),
                 Room(name="Middle", prev_meter=4693, curr_meter=4693, tenants=["Eric"]),
-                Room(name="Small", prev_meter=4255, curr_meter=4312, tenants=["Honger"]),
+                Room(name="Small", prev_meter=4255, curr_meter=4312, tenants=["Alex"]),
             ],
             rate_mode="ceil"
         )

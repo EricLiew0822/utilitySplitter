@@ -1,31 +1,27 @@
 :root {
-  --primary-color: #2563eb;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --primary-color: #1976d2;
+  --primary-dark: #0d47a1;
+  --font-sans: 'Inter', 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #f8fafc !important;
-  color: #0f172a;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.fw-extrabold {
-  font-weight: 800;
+  background-color: #f6fafe;
+  color: #0b1c30;
 }
 
 .brand-logo-img {
   border-radius: 10px;
   object-fit: contain;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 6px -1px rgba(25, 118, 210, 0.18);
 }
 
 .step-badge {
-  background-color: #2563eb;
+  background-color: #1976d2;
   color: #ffffff;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -35,52 +31,11 @@ body {
   flex-shrink: 0;
 }
 
-.extra-small {
-  font-size: 0.75rem !important;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* Hero Banner & Feature Cards */
-.hero-banner {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
-}
-
-.feature-mini-card {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.feature-mini-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
-}
-
-/* Tenant Breakdown Table */
-.tenant-table th {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  font-weight: 700;
-  color: #475569;
-}
-
-.tenant-table td {
-  font-size: 0.875rem;
-}
-
-.tenant-total-badge {
-  font-weight: 800;
-  background: #fef3c7;
-  color: #78350f;
-  padding: 4px 8px;
-  border-radius: 6px;
-  display: inline-block;
+/* Navigation Active States */
+header .nav-tab-btn.active {
+  background-color: #1976d2 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.25);
 }
 
 /* PDF Miniature Live Preview Card */
@@ -91,14 +46,14 @@ body {
 
 .pdf-preview-wrapper:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.2) !important;
-  border-color: #93c5fd !important;
+  box-shadow: 0 8px 20px -4px rgba(25, 118, 210, 0.2) !important;
+  border-color: #42a5f5 !important;
 }
 
 .pdf-hover-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(30, 58, 138, 0.08);
+  background: rgba(13, 71, 161, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,45 +67,18 @@ body {
   opacity: 1;
 }
 
-/* Dark Theme Support (Preserving Primary Brand Color) */
-[data-bs-theme="dark"] body {
-  background-color: #0f172a !important;
-  color: #f8fafc;
-}
-
-[data-bs-theme="dark"] .bg-white,
-[data-bs-theme="dark"] .card,
-[data-bs-theme="dark"] .navbar {
-  background-color: #1e293b !important;
-  color: #f8fafc !important;
-}
-
-[data-bs-theme="dark"] .bg-light,
-[data-bs-theme="dark"] .table-light {
-  background-color: #0f172a !important;
-  color: #cbd5e1 !important;
-}
-
-[data-bs-theme="dark"] .text-dark {
-  color: #f8fafc !important;
-}
-
-[data-bs-theme="dark"] .hero-banner {
-  background: linear-gradient(135deg, #1e293b 0%, #172554 100%);
-}
-
 /* Toast Popup */
 .toast-popup {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #1e293b;
+  background: #0d47a1;
   color: #ffffff;
   padding: 12px 20px;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(13, 71, 161, 0.35);
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.3s ease;
@@ -161,4 +89,10 @@ body {
 .toast-popup.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }

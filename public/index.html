@@ -1,446 +1,1188 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>House Utility Bill Calculator | Electricity & Water</title>
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-  
-  <!-- Icons -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>House Utility Bill Calculator | Electricity & Water Splitter</title>
+
+  <!-- Brand Icons (Preserved favicon.svg) -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="apple-touch-icon" href="favicon.svg" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
-  <!-- Bootstrap 5 CSS CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
-  
-  <!-- Custom Overrides & Enhancements -->
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#1976d2",
+            "primary-dark": "#0d47a1",
+            "primary-container": "#1976d2",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#ffffff",
+            "primary-fixed": "#e3f2fd",
+            "on-primary-fixed": "#0d47a1",
+            "secondary": "#00668a",
+            "secondary-container": "#42a5f5",
+            "on-secondary": "#ffffff",
+            "secondary-fixed": "#e3f2fd",
+            "on-secondary-fixed": "#0d47a1",
+            "tertiary": "#00685f",
+            "tertiary-container": "#008378",
+            "on-tertiary": "#ffffff",
+            "tertiary-fixed": "#89f5e7",
+            "on-tertiary-fixed": "#00201d",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "on-error": "#ffffff",
+            "on-error-container": "#93000a",
+            "background": "#f6fafe",
+            "surface": "#f6fafe",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#e3f2fd",
+            "surface-container": "#e3f2fd",
+            "surface-container-high": "#dce9ff",
+            "surface-container-highest": "#bbdefb",
+            "on-surface": "#0b1c30",
+            "on-surface-variant": "#3f4850",
+            "outline": "#707881",
+            "outline-variant": "#bbdefb",
+            "inverse-surface": "#1e293b",
+            "inverse-on-surface": "#f8fafc"
+          },
+          fontFamily: {
+            "sans": ["Inter", "Hanken Grotesk", "system-ui", "sans-serif"],
+            "headline": ["Space Grotesk", "Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="bg-light">
-  <div class="container py-4">
-    <!-- Top Navbar Header -->
-    <header class="navbar navbar-expand-lg bg-white rounded-3 shadow-sm p-3 mb-4 border d-flex flex-wrap justify-content-between align-items-center gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <img src="favicon.svg" alt="Utility Calculator Logo" class="brand-logo-img" width="48" height="48" />
-        <div>
-          <h1 class="h4 mb-0 fw-bold text-primary">House Utility Bill Calculator</h1>
-          <p class="text-muted small mb-0">Electricity & Water Bill Splitter with Sub-Meter & Balance Carryover</p>
-        </div>
-      </div>
-      <div class="d-flex flex-wrap align-items-center gap-2">
-        <button id="btnThemeToggle" class="btn btn-outline-secondary btn-sm" title="Toggle Light/Dark Mode">
-          <i class="bi bi-moon-stars" id="themeIcon"></i>
-        </button>
-        <button class="btn btn-outline-primary btn-sm position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#historyOffcanvas" aria-controls="historyOffcanvas" title="View saved past bills">
-          <i class="bi bi-clock-history me-1"></i> Bill History
-          <span id="historyCountBadge" class="badge rounded-pill bg-primary ms-1">0</span>
-        </button>
-        <button id="btnResetAll" class="btn btn-outline-danger btn-sm" title="Reset all input fields to blank">
-          <i class="bi bi-trash3 me-1"></i> Reset All Values
-        </button>
-        <button id="btnLoadSample" class="btn btn-outline-primary btn-sm" title="Load sample bill data for preview and testing">
-          <i class="bi bi-arrow-repeat me-1"></i> Load Sample Data
-        </button>
-        <button id="btnRollForward" class="btn btn-primary btn-sm shadow-sm" title="Archive current bill & shift readings to next month">
-          <i class="bi bi-fast-forward me-1"></i> Roll Forward to Next Month
-        </button>
-      </div>
-    </header>
+<body class="bg-background font-sans text-sm text-on-surface antialiased min-h-screen flex flex-col pb-16 xl:pb-0">
 
-    <!-- SplitWatt-Style Hero & Feature Strip -->
-    <section class="hero-banner rounded-3 p-4 mb-4 border shadow-sm bg-white">
-      <div class="row align-items-center g-4">
-        <div class="col-lg-7">
-          <span class="badge bg-primary-subtle text-primary fw-semibold mb-2 px-3 py-1 rounded-pill">
-            <i class="bi bi-lightning-charge-fill me-1"></i> Fair Roommate Utility Splitting
+  <!-- ==================== TOP NAVIGATION BAR ==================== -->
+  <header class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-outline-variant shadow-sm no-print">
+    <div class="max-w-7xl mx-auto h-20 px-4 sm:px-6 flex items-center justify-between gap-4">
+      <!-- Brand Logo & Title -->
+      <a href="#calculator" data-nav="calculator" class="flex items-center gap-3 group cursor-pointer">
+        <img src="favicon.svg" alt="House Utility Bill Calculator Logo" class="w-11 h-11 rounded-xl shadow-sm object-contain brand-logo-img" />
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <span class="font-headline font-bold text-lg text-primary-dark leading-tight tracking-tight">UtilitySplit</span>
+          </div>
+          <span class="text-xs text-on-surface-variant font-medium">House Utility Bill Calculator</span>
+        </div>
+      </a>
+
+      <!-- 4-Page Desktop Navigation Pills -->
+      <nav class="hidden xl:flex items-center gap-1 p-1.5 bg-surface-container-low rounded-xl border border-outline-variant">
+        <button type="button" data-nav="calculator" class="nav-tab-btn active px-4 py-2 rounded-lg font-semibold text-xs transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[18px]">calculate</span>
+          <span>Calculator &amp; Splitter</span>
+        </button>
+        <button type="button" data-nav="history" class="nav-tab-btn px-4 py-2 rounded-lg font-semibold text-xs text-on-surface-variant hover:text-primary-dark transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[18px]">analytics</span>
+          <span>Bill History &amp; Trends</span>
+          <span id="navHistoryCount" class="px-1.5 py-0.2 rounded-full bg-white text-primary font-mono text-[10px] border border-outline-variant">0</span>
+        </button>
+        <button type="button" data-nav="directory" class="nav-tab-btn px-4 py-2 rounded-lg font-semibold text-xs text-on-surface-variant hover:text-primary-dark transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[18px]">groups</span>
+          <span>Tenant &amp; Room Directory</span>
+        </button>
+        <button type="button" data-nav="guide" class="nav-tab-btn px-4 py-2 rounded-lg font-semibold text-xs text-on-surface-variant hover:text-primary-dark transition-all flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[18px]">menu_book</span>
+          <span>How It Works &amp; Guide</span>
+        </button>
+      </nav>
+
+      <!-- Global Quick Actions -->
+      <div class="flex items-center gap-2">
+        <button type="button" id="btnHeaderPdf" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-outline-variant text-on-surface hover:bg-surface-container-low transition-all font-semibold text-xs shadow-sm" title="Open Official A4 PDF Statement">
+          <span class="material-symbols-outlined text-[18px] text-primary">picture_as_pdf</span>
+          <span class="hidden md:inline">Quick PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE CONTAINER ==================== -->
+  <main class="flex-1 w-full pt-24 pb-12 max-w-7xl mx-auto px-4 sm:px-6 no-print">
+
+    <!-- =====================================================================
+         PAGE 1: CALCULATOR & SPLITTER
+         ===================================================================== -->
+    <div id="view-calculator" class="page-view space-y-6">
+      <!-- Cycle Control & Notification Bar -->
+      <section class="bg-surface-container-low border border-outline-variant rounded-2xl p-4 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white font-semibold text-xs shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">calendar_month</span>
+            <span id="dispCycleHeader">Billing Cycle: Current Period</span>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-primary-dark border border-outline-variant font-mono text-xs font-medium">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            Auto-shifts previous readings
           </span>
-          <h2 class="h3 fw-extrabold text-dark mb-2">Split electricity & water bills fairly among roommates</h2>
-          <p class="text-secondary small mb-3">
-            Use room AC sub-meter readings to calculate each tenant's exact share. Automatically handle common area costs, carryover balances, billing history, and export statements in seconds.
-          </p>
-          <div class="d-flex flex-wrap gap-2">
-            <a href="#calculatorSection" class="btn btn-primary btn-sm px-3 fw-semibold shadow-sm">
-              <i class="bi bi-calculator me-1"></i> Split a Bill Now
-            </a>
-            <button class="btn btn-outline-secondary btn-sm px-3" type="button" data-bs-toggle="collapse" data-bs-target="#howItWorksCollapse" aria-expanded="false">
-              <i class="bi bi-info-circle me-1"></i> See How It Works
-            </button>
-          </div>
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white text-on-surface-variant border border-outline-variant font-medium text-xs" id="dispHeaderOccupancyPill">
+            <span class="material-symbols-outlined text-[15px] text-primary">home</span>
+            3 Rooms • 4 Occupants
+          </span>
         </div>
-        <div class="col-lg-5">
-          <div class="row g-2">
-            <div class="col-6">
-              <div class="feature-mini-card p-2 rounded border bg-light h-100">
-                <i class="bi bi-speedometer2 text-primary fw-bold me-1"></i>
-                <strong class="extra-small text-dark">Sub-Meter Tracking</strong>
-                <p class="extra-small text-muted mb-0 mt-1">Auto-calculates individual room AC kWh usage.</p>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="feature-mini-card p-2 rounded border bg-light h-100">
-                <i class="bi bi-pie-chart text-primary fw-bold me-1"></i>
-                <strong class="extra-small text-dark">Common Area Split</strong>
-                <p class="extra-small text-muted mb-0 mt-1">Splits shared electricity & water equally across tenants.</p>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="feature-mini-card p-2 rounded border bg-light h-100">
-                <i class="bi bi-arrow-left-right text-primary fw-bold me-1"></i>
-                <strong class="extra-small text-dark">Auto Reading Shift</strong>
-                <p class="extra-small text-muted mb-0 mt-1">One-click roll forward shifts meters & balance.</p>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="feature-mini-card p-2 rounded border bg-light h-100">
-                <i class="bi bi-whatsapp text-success fw-bold me-1"></i>
-                <strong class="extra-small text-dark">PDF, Image & WhatsApp</strong>
-                <p class="extra-small text-muted mb-0 mt-1">Export clean statements or share in one tap.</p>
-              </div>
-            </div>
-          </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btnLoadSample" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-on-surface border border-outline-variant hover:bg-surface-container-high transition-all font-semibold text-xs shadow-sm">
+            <span class="material-symbols-outlined text-[16px] text-primary">restart_alt</span>
+            <span>Load Sample Data</span>
+          </button>
+          <button type="button" id="btnResetAll" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-error border border-error-container hover:bg-error-container transition-all font-semibold text-xs shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+            <span>Reset All Values</span>
+          </button>
+          <button type="button" id="btnRollForward" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-all font-semibold text-xs shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">fast_forward</span>
+            <span>Roll Forward to Next Month</span>
+          </button>
         </div>
-      </div>
+      </section>
 
-      <!-- Collapsible How It Works -->
-      <div class="collapse mt-4 pt-3 border-top" id="howItWorksCollapse">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <div class="p-3 rounded border bg-light h-100">
-              <span class="step-badge mb-2">1</span>
-              <h3 class="h6 fw-bold text-dark">Add Bill Details</h3>
-              <p class="extra-small text-muted mb-0">Enter your electric bill, water bill, previous month carryover balance, and total grid kWh.</p>
+      <!-- 5-Card KPI Metric Ribbon -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <!-- Card 1: Total Electric Bill -->
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Total Electric Bill</span>
+            <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[18px]">bolt</span>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="p-3 rounded border bg-light h-100">
-              <span class="step-badge mb-2">2</span>
-              <h3 class="h6 fw-bold text-dark">Add Sub-Meters & Tenants</h3>
-              <p class="extra-small text-muted mb-0">Input previous and current room AC meter readings along with tenant names for each room.</p>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="p-3 rounded border bg-light h-100">
-              <span class="step-badge mb-2">3</span>
-              <h3 class="h6 fw-bold text-dark">Save & Share Results</h3>
-              <p class="extra-small text-muted mb-0">Save to Bill History, export as an official A4 PDF or PNG image, or share directly to WhatsApp.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Main Grid Layout -->
-    <main class="row g-4" id="calculatorSection">
-      <!-- Left Column: Inputs -->
-      <section class="col-lg-6 col-12 d-flex flex-column gap-4">
-        <!-- 1. Utility Invoices Card -->
-        <div class="card shadow-sm border">
-          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h2 class="h5 mb-0 fw-bold text-dark d-flex align-items-center">
-              <span class="step-badge me-2">1</span> Utility Bill Summary
-            </h2>
-            <span class="badge bg-light text-secondary border extra-small">Main Grid & Water</span>
-          </div>
-          <div class="card-body p-4">
-            <div class="row g-3 mb-3">
-              <div class="col-md-5 col-12">
-                <label for="electricDate" class="form-label fw-semibold small text-secondary">Electric Bill Due Date</label>
-                <input type="date" id="electricDate" class="form-control" />
-              </div>
-              <div class="col-md-7 col-12">
-                <label class="form-label fw-semibold small text-secondary">Water Bill Period</label>
-                <div class="input-group">
-                  <input type="date" id="waterStartDate" class="form-control" />
-                  <span class="input-group-text bg-light text-muted small">to</span>
-                  <input type="date" id="waterEndDate" class="form-control" />
-                </div>
-              </div>
-            </div>
-
-            <div class="row g-3 mb-3">
-              <div class="col-md-4 col-sm-6 col-12">
-                <label for="electricAmount" class="form-label fw-semibold small text-secondary">Electric Bill</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light fw-bold text-secondary">RM</span>
-                  <input type="number" step="0.01" id="electricAmount" class="form-control" placeholder="0.00" />
-                </div>
-              </div>
-              <div class="col-md-4 col-sm-6 col-12">
-                <label for="prevBalance" class="form-label fw-semibold small text-secondary">Prev. Balance Deduction</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light fw-bold text-secondary">RM</span>
-                  <input type="number" step="0.01" id="prevBalance" class="form-control" placeholder="0.00" />
-                </div>
-                <div class="form-text small text-muted">Carried surplus from last month</div>
-              </div>
-              <div class="col-md-4 col-sm-12 col-12">
-                <label for="totalKwh" class="form-label fw-semibold small text-secondary">Total Grid Usage</label>
-                <div class="input-group">
-                  <input type="number" step="0.1" id="totalKwh" class="form-control" placeholder="0" />
-                  <span class="input-group-text bg-light fw-bold text-secondary">kWh</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="row g-3">
-              <div class="col-md-5 col-12">
-                <label for="waterAmount" class="form-label fw-semibold small text-secondary">Total Water Bill</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light fw-bold text-secondary">RM</span>
-                  <input type="number" step="0.01" id="waterAmount" class="form-control" placeholder="0.00" />
-                </div>
-              </div>
-              <div class="col-md-7 col-12">
-                <label for="rateMode" class="form-label fw-semibold small text-secondary">Rate Calculation Strategy</label>
-                <select id="rateMode" class="form-select">
-                  <option value="ceil" selected>Ceil / Round Up - Standard House Rule</option>
-                  <option value="exact">Exact Rate (No Rounding)</option>
-                  <option value="manual">Manual Fixed Rate</option>
-                </select>
-              </div>
-            </div>
-
-            <div id="manualRateGroup" class="mt-3 hidden">
-              <label for="manualRate" class="form-label fw-semibold small text-secondary">Custom Electric Rate</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light fw-bold text-secondary">RM</span>
-                <input type="number" step="0.0001" id="manualRate" class="form-control" placeholder="0.00" />
-                <span class="input-group-text bg-light small">/ kWh</span>
-              </div>
-            </div>
+          <div>
+            <div class="font-mono text-2xl font-bold text-primary-dark" id="kpiElectricRm">RM 157.15</div>
+            <p class="text-xs text-on-surface-variant mt-1">
+              <span class="font-mono font-semibold text-primary" id="kpiElectricKwh">477 kWh</span> total grid
+            </p>
           </div>
         </div>
 
-        <!-- 2. Rooms & Sub-meters Card -->
-        <div class="card shadow-sm border">
-          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h2 class="h5 mb-0 fw-bold text-dark d-flex align-items-center">
-              <span class="step-badge me-2">2</span> Rooms, AC Sub-Meters & Tenant Names
-            </h2>
-            <button type="button" id="btnAddRoom" class="btn btn-outline-primary btn-sm">
-              <i class="bi bi-plus-lg me-1"></i> Add Room
-            </button>
-          </div>
-          <div class="card-body p-4">
-            <div id="roomsContainer" class="d-flex flex-column gap-3">
-              <!-- Dynamically rendered room cards -->
+        <!-- Card 2: Total Water Bill -->
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Total Water Bill</span>
+            <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-secondary">
+              <span class="material-symbols-outlined text-[18px]">water_drop</span>
             </div>
+          </div>
+          <div>
+            <div class="font-mono text-2xl font-bold text-primary-dark" id="kpiWaterRm">RM 7.00</div>
+            <p class="text-xs text-on-surface-variant mt-1" id="kpiWaterPerPax">4 Pax • RM 1.75 / pax</p>
+          </div>
+        </div>
+
+        <!-- Card 3: Prev Carryover -->
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Prev Carryover</span>
+            <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-surface-variant">
+              <span class="material-symbols-outlined text-[18px]">history</span>
+            </div>
+          </div>
+          <div>
+            <div class="font-mono text-2xl font-bold text-on-surface-variant" id="kpiPrevCarry">-RM 2.42</div>
+            <p class="text-xs text-on-surface-variant mt-1" id="dispNetElectric">Net Electric: RM 154.73</p>
+          </div>
+        </div>
+
+        <!-- Card 4: Effective Rate -->
+        <div class="bg-primary-fixed rounded-xl p-4 shadow-sm border border-secondary-container flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-primary-dark">Effective Rate</span>
+            <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[18px]">calculate</span>
+            </div>
+          </div>
+          <div>
+            <div class="font-mono text-2xl font-bold text-primary" id="dispUnitRate">RM 0.33/kWh</div>
+            <p class="text-xs text-primary-dark mt-1 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+              <span id="kpiRateModeLabel">Ceil / Round Up Active</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Card 5: Next Carryover Surplus -->
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-tertiary">Next Carryover Surplus</span>
+            <div class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+              <span class="material-symbols-outlined text-[18px]">savings</span>
+            </div>
+          </div>
+          <div>
+            <div class="font-mono text-2xl font-bold text-tertiary" id="kpiNextSurplus">+RM 0.26</div>
+            <p class="text-xs text-on-surface-variant mt-1">Credits forward to next bill</p>
           </div>
         </div>
       </section>
 
-      <!-- Right Column: Live Results & Formatted Output -->
-      <section class="col-lg-6 col-12 d-flex flex-column gap-4">
-        <!-- Metric Summary Pills -->
-        <div class="row g-3">
-          <div class="col-md-4 col-sm-6 col-12">
-            <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-primary border-4">
-              <span class="text-muted text-uppercase fw-bold extra-small">Effective Rate</span>
-              <div class="h4 mb-0 fw-bold text-primary" id="dispUnitRate">RM 0.33<span class="fs-6 text-muted">/kWh</span></div>
-              <span class="text-muted extra-small mt-1" id="dispNetElectric">Net: RM 154.73</span>
+      <!-- Main Two-Column Calculator Workspace -->
+      <section class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        <!-- LEFT COLUMN: Inputs & Sub-Meters -->
+        <div class="xl:col-span-6 flex flex-col gap-6">
+          <!-- STEP 1: Main Utility Bill Details -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-outline-variant">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-surface-container-high">
+              <div class="flex items-center gap-2.5">
+                <span class="step-badge">1</span>
+                <h2 class="font-headline font-bold text-lg text-primary-dark">Main Utility Bill Details</h2>
+              </div>
+              <span class="text-xs font-semibold text-primary bg-primary-fixed px-3 py-1 rounded-full border border-outline-variant">Primary Master Bill</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Electric Due Date -->
+              <div class="flex flex-col gap-1">
+                <label for="electricDate" class="text-xs font-semibold text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[15px] text-primary">event</span>
+                  Electric Bill Due Date
+                </label>
+                <input type="date" id="electricDate" class="w-full px-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface font-medium text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              <!-- Water Bill Period -->
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-semibold text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[15px] text-primary">date_range</span>
+                  Water Bill Period
+                </label>
+                <div class="flex items-center gap-1.5">
+                  <input type="date" id="waterStartDate" class="w-full px-2.5 py-2 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface font-medium text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                  <span class="text-xs text-on-surface-variant font-semibold">to</span>
+                  <input type="date" id="waterEndDate" class="w-full px-2.5 py-2 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface font-medium text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                </div>
+              </div>
+
+              <!-- Electric Bill RM -->
+              <div class="flex flex-col gap-1">
+                <label for="electricAmount" class="text-xs font-semibold text-on-surface-variant flex justify-between">
+                  <span>Total Electric Bill</span>
+                  <span class="font-mono text-[11px] text-primary">TNB Bill RM</span>
+                </label>
+                <div class="relative flex items-center">
+                  <span class="absolute left-3 font-mono text-xs font-bold text-on-surface-variant">RM</span>
+                  <input type="number" step="0.01" id="electricAmount" placeholder="0.00" class="w-full pl-10 pr-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant font-mono font-semibold text-sm text-on-surface focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                </div>
+              </div>
+
+              <!-- Total Grid Usage kWh -->
+              <div class="flex flex-col gap-1">
+                <label for="totalKwh" class="text-xs font-semibold text-on-surface-variant flex justify-between">
+                  <span>Total Grid Usage</span>
+                  <span class="font-mono text-[11px] text-secondary">Main Meter</span>
+                </label>
+                <div class="relative flex items-center">
+                  <input type="number" step="0.1" id="totalKwh" placeholder="0" class="w-full pl-3 pr-12 py-2 rounded-lg bg-surface-container-low border border-outline-variant font-mono font-semibold text-sm text-on-surface focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                  <span class="absolute right-3 font-mono text-xs font-bold text-on-surface-variant">kWh</span>
+                </div>
+              </div>
+
+              <!-- Total Water Bill RM -->
+              <div class="flex flex-col gap-1">
+                <label for="waterAmount" class="text-xs font-semibold text-on-surface-variant flex justify-between">
+                  <span>Total Water Bill</span>
+                  <span class="font-mono text-[11px] text-secondary">Water RM</span>
+                </label>
+                <div class="relative flex items-center">
+                  <span class="absolute left-3 font-mono text-xs font-bold text-on-surface-variant">RM</span>
+                  <input type="number" step="0.01" id="waterAmount" placeholder="0.00" class="w-full pl-10 pr-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant font-mono font-semibold text-sm text-on-surface focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                </div>
+              </div>
+
+              <!-- Prev Balance Deduction RM -->
+              <div class="flex flex-col gap-1">
+                <label for="prevBalance" class="text-xs font-semibold text-on-surface-variant flex justify-between">
+                  <span>Prev. Balance Deduction</span>
+                  <span class="font-mono text-[11px] text-tertiary">Auto-deduct</span>
+                </label>
+                <div class="relative flex items-center">
+                  <span class="absolute left-3 font-mono text-xs font-bold text-on-surface-variant">-RM</span>
+                  <input type="number" step="0.01" id="prevBalance" placeholder="0.00" class="w-full pl-12 pr-3 py-2 rounded-lg bg-surface-container-low border border-outline-variant font-mono font-semibold text-sm text-on-surface focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Rate Strategy Switcher -->
+            <div class="mt-5 p-4 rounded-xl bg-surface-container-low border border-outline-variant">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-primary-dark">Rate Calculation Strategy</span>
+                <select id="rateMode" class="hidden">
+                  <option value="ceil" selected>Ceil</option>
+                  <option value="exact">Exact</option>
+                  <option value="manual">Manual</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button type="button" data-strategy="ceil" class="strategy-btn bg-primary text-white font-semibold text-xs py-2 px-3 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">arrow_circle_up</span>
+                  <span>Ceil / Round Up</span>
+                </button>
+                <button type="button" data-strategy="exact" class="strategy-btn bg-white text-on-surface-variant font-semibold text-xs py-2 px-3 rounded-lg border border-outline-variant hover:text-primary-dark transition-all">
+                  Exact Decimal Rate
+                </button>
+                <button type="button" data-strategy="manual" class="strategy-btn bg-white text-on-surface-variant font-semibold text-xs py-2 px-3 rounded-lg border border-outline-variant hover:text-primary-dark transition-all">
+                  Manual Fixed Rate
+                </button>
+              </div>
+
+              <!-- Custom Manual Rate Field -->
+              <div id="manualRateGroup" class="mt-3 hidden">
+                <label for="manualRate" class="block text-xs font-semibold text-primary-dark mb-1">Custom Fixed Electric Rate (RM / kWh)</label>
+                <div class="relative flex items-center">
+                  <span class="absolute left-3 font-mono text-xs font-bold text-on-surface-variant">RM</span>
+                  <input type="number" step="0.0001" id="manualRate" placeholder="0.33" class="w-full pl-10 pr-14 py-2 rounded-lg bg-white border border-outline-variant font-mono font-semibold text-sm" />
+                  <span class="absolute right-3 font-mono text-xs text-on-surface-variant">/ kWh</span>
+                </div>
+              </div>
+
+              <!-- Live Formula Summary Banner -->
+              <div class="mt-3 p-2.5 rounded-lg bg-white border border-outline-variant flex items-center gap-2 text-xs">
+                <span class="material-symbols-outlined text-primary text-[18px] shrink-0">info</span>
+                <p class="leading-snug text-on-surface">
+                  <span class="font-mono font-bold text-primary" id="bannerRateText">Rate: RM 0.33/kWh</span> •
+                  <span class="text-on-surface-variant" id="dispCommonKwh">Common: 220 kWh / 4 pax</span> =
+                  <strong class="font-mono text-primary-dark" id="dispCommonPerPerson">RM 18.15</strong> each •
+                  Water: <strong class="font-mono text-secondary" id="dispWaterPerPerson">RM 1.75</strong> each
+                </p>
+              </div>
             </div>
           </div>
-          <div class="col-md-4 col-sm-6 col-12">
-            <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-info border-4">
-              <span class="text-muted text-uppercase fw-bold extra-small">Common Electric</span>
-              <div class="h4 mb-0 fw-bold text-dark" id="dispCommonPerPerson">RM 18.15</div>
-              <span class="text-muted extra-small mt-1" id="dispCommonKwh">220 kWh / 4 pax</span>
+
+          <!-- STEP 2: Sub-Meter Readings by Room -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-outline-variant">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-surface-container-high">
+              <div class="flex items-center gap-2.5">
+                <span class="step-badge">2</span>
+                <h2 class="font-headline font-bold text-lg text-primary-dark">Rooms, AC Sub-Meters &amp; Tenants</h2>
+              </div>
+              <button type="button" id="btnAddRoom" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-fixed text-primary-dark hover:bg-surface-container-highest border border-outline-variant font-bold text-xs transition-all">
+                <span class="material-symbols-outlined text-[16px]">add</span>
+                <span>Add Room</span>
+              </button>
             </div>
-          </div>
-          <div class="col-md-4 col-sm-12 col-12">
-            <div class="card border-0 shadow-sm p-3 h-100 bg-white border-start border-success border-4">
-              <span class="text-muted text-uppercase fw-bold extra-small">Water Per Person</span>
-              <div class="h4 mb-0 fw-bold text-dark" id="dispWaterPerPerson">RM 1.75</div>
-              <span class="text-muted extra-small mt-1" id="dispTotalTenants">4 Total Tenants</span>
+
+            <!-- Dynamic Rooms Container -->
+            <div id="roomsContainer" class="flex flex-col gap-4"></div>
+
+            <!-- Sub-meter vs Common Grid Residual Bar -->
+            <div class="mt-5 p-4 rounded-xl bg-surface-container-low border border-outline-variant flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-headline font-bold text-xs text-primary-dark">Sub-Meter vs. Common Grid Residual</span>
+                <span class="font-mono text-xs font-bold text-primary" id="dispResidualHeader">220 kWh Unmetered Common</span>
+              </div>
+              <div id="gridAllocationBar" class="w-full h-3.5 bg-white rounded-full overflow-hidden flex border border-outline-variant"></div>
+              <div id="gridAllocationLegend" class="flex flex-wrap items-center gap-3 text-[11px] text-on-surface-variant pt-1"></div>
+              <p class="text-[11px] text-on-surface-variant italic" id="dispResidualFormula">
+                Residual formula: 477 kWh (Main Grid) − 257 kWh (Room Sub-meters) = 220 kWh shared equally.
+              </p>
             </div>
           </div>
         </div>
 
-        <!-- 3. Tenant Breakdown Table (Capturable for Image Export) -->
-        <div class="card shadow-sm border" id="captureBreakdownCard">
-          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h2 class="h5 mb-0 fw-bold text-dark d-flex align-items-center">
-              <span class="step-badge me-2">3</span> Individual Tenant Breakdown
-            </h2>
-            <button id="btnSaveHistory" class="btn btn-outline-primary btn-sm" title="Save this bill calculation to browser history">
-              <i class="bi bi-bookmark-plus me-1"></i> Save to History
-            </button>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0 tenant-table">
-                <colgroup>
-                  <col style="width: 20%;" />
-                  <col style="width: 15%;" />
-                  <col style="width: 20%;" />
-                  <col style="width: 15%;" />
-                  <col style="width: 14%;" />
-                  <col style="width: 16%;" />
-                </colgroup>
-                <thead class="table-light">
-                  <tr>
-                    <th class="ps-3 text-start">Tenant Name</th>
-                    <th class="text-center">Room</th>
-                    <th class="text-center">COMMON ELECTRICITY</th>
-                    <th class="text-center">Room AC</th>
-                    <th class="text-center">Water</th>
-                    <th class="text-end pe-3">Total Payable</th>
+        <!-- RIGHT COLUMN: Settlement Table & Export Center -->
+        <div class="xl:col-span-6 flex flex-col gap-6">
+          <!-- STEP 3: Individual Tenant Breakdown Table (Capturable for PNG Export) -->
+          <div id="captureBreakdownCard" class="bg-white rounded-2xl p-6 shadow-sm border border-outline-variant">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-surface-container-high flex-wrap gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="step-badge">3</span>
+                <h2 class="font-headline font-bold text-lg text-primary-dark">Individual Settlement Table</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-tertiary bg-tertiary-fixed px-3 py-1 rounded-full" id="dispTotalTenants">4 Active Residents</span>
+                <button type="button" id="btnSaveHistory" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-fixed text-primary-dark hover:bg-surface-container-highest border border-outline-variant font-bold text-xs transition-all">
+                  <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+                  <span>Save to History</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-outline-variant">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-surface-container-low text-primary-dark font-mono text-[11px] uppercase tracking-wider border-b border-outline-variant">
+                    <th class="py-3 px-3">Tenant</th>
+                    <th class="py-3 px-2 text-center">Room</th>
+                    <th class="py-3 px-2 text-right">Common</th>
+                    <th class="py-3 px-2 text-right">Room AC</th>
+                    <th class="py-3 px-2 text-right">Water</th>
+                    <th class="py-3 px-3 text-right">Total Payable</th>
+                    <th class="py-3 px-2 text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody id="tenantTableBody">
-                  <!-- Dynamically rendered rows -->
-                </tbody>
+                <tbody id="tenantTableBody" class="divide-y divide-surface-container-high text-xs"></tbody>
               </table>
             </div>
 
             <!-- Financial Reconciliation Box -->
-            <div class="p-4 bg-light border-top">
-              <div class="d-flex justify-content-between mb-2 small text-secondary">
-                <span>Total Collected from Tenants:</span>
-                <strong class="text-dark" id="dispCollected">RM 164.41</strong>
+            <div class="mt-4 p-4 rounded-xl bg-surface-container-low border border-outline-variant flex flex-col gap-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="text-[11px] font-bold text-on-surface-variant uppercase block">Total Collected</span>
+                  <span class="font-mono font-bold text-lg text-primary" id="dispCollected">RM 164.41</span>
+                </div>
+                <div>
+                  <span class="text-[11px] font-bold text-on-surface-variant uppercase block">Actual Incurred</span>
+                  <span class="font-mono font-bold text-lg text-on-surface" id="dispActual">RM 164.15</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[11px] font-bold text-tertiary uppercase block">Next Month Carryover</span>
+                  <span class="font-mono font-extrabold text-lg px-2.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300" id="dispBalance">RM 0.26</span>
+                </div>
               </div>
-              <div class="d-flex justify-content-between mb-2 small text-secondary">
-                <span>Actual Incurred (Electric + Water):</span>
-                <span id="dispActual">RM 164.15</span>
+              <div class="p-2.5 rounded-lg bg-white border border-outline-variant flex items-start gap-2 text-xs text-on-surface-variant mt-1">
+                <span class="material-symbols-outlined text-tertiary text-[18px] shrink-0">account_balance_wallet</span>
+                <p><strong>Carryover Balance Rule:</strong> Any rounding surplus collected is automatically deducted from next month's electric bill before calculating the unit rate.</p>
               </div>
-              <hr class="my-2" />
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-dark">Next Month Carryover Balance:</span>
-                <span class="badge bg-warning text-dark fs-6 px-3 py-2 fw-bold" id="dispBalance">RM 0.26</span>
-              </div>
-              <p class="small text-muted mb-0 mt-2">💡 This balance will automatically be deducted from next month's electric bill before calculating the unit rate.</p>
             </div>
           </div>
-        </div>
 
-        <!-- 4. Report, Image, WhatsApp & PDF Statement Card -->
-        <div class="card shadow-sm border">
-          <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h2 class="h5 mb-0 fw-bold text-dark d-flex align-items-center">
-              <span class="step-badge me-2">4</span> Export & Share Statement
-            </h2>
-            <div class="d-flex flex-wrap gap-2">
-              <button id="btnShareWa" class="btn btn-success btn-sm shadow-sm" title="Share formatted summary directly to WhatsApp">
-                <i class="bi bi-whatsapp me-1"></i> WhatsApp
+          <!-- STEP 4: Export & House WhatsApp Dispatch -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-outline-variant">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-surface-container-high">
+              <div class="flex items-center gap-2.5">
+                <span class="step-badge">4</span>
+                <h2 class="font-headline font-bold text-lg text-primary-dark">Export &amp; House WhatsApp Dispatch</h2>
+              </div>
+              <span class="font-mono text-xs text-primary font-semibold">Ready to Share</span>
+            </div>
+
+            <!-- Live WhatsApp Formatted Preview Box -->
+            <div class="rounded-xl bg-surface-container-low p-4 border border-outline-variant mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-primary-dark flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-primary">chat</span>
+                  WhatsApp Message Preview
+                </span>
+                <span class="font-mono text-[11px] text-on-surface-variant" id="miniDocPeriod">Current Period</span>
+              </div>
+              <pre id="waLivePreviewBox" class="bg-white rounded-lg p-3 font-mono text-xs text-on-surface overflow-x-auto whitespace-pre-wrap leading-relaxed border border-outline-variant max-h-60 select-all"></pre>
+            </div>
+
+            <!-- 4 Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+              <button type="button" id="btnCopyReport" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark font-semibold text-xs shadow-sm transition-all">
+                <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                <span>Copy Formatted WhatsApp</span>
               </button>
-              <button id="btnDownloadImg" class="btn btn-outline-primary btn-sm" title="Download PNG image of breakdown">
-                <i class="bi bi-image me-1"></i> Save Image
+              <button type="button" id="btnShareWa" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-semibold text-xs shadow-sm transition-all">
+                <span class="material-symbols-outlined text-[18px]">send</span>
+                <span>Direct WhatsApp Share</span>
               </button>
-              <button id="btnOpenPdf" class="btn btn-primary btn-sm shadow-sm" title="Open and export PDF invoice in a new tab">
-                <i class="bi bi-file-earmark-pdf me-1"></i> Export to PDF
+              <button type="button" id="btnOpenPdf" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-fixed text-primary-dark hover:bg-surface-container-highest border border-outline-variant font-bold text-xs transition-all">
+                <span class="material-symbols-outlined text-[18px] text-primary">picture_as_pdf</span>
+                <span>Export Official A4 PDF</span>
               </button>
-              <button id="btnCopyReport" class="btn btn-outline-secondary btn-sm" title="Copy formatted summary report to clipboard">
-                <i class="bi bi-clipboard me-1"></i> Copy Report
+              <button type="button" id="btnDownloadImg" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-fixed text-primary-dark hover:bg-surface-container-highest border border-outline-variant font-bold text-xs transition-all">
+                <span class="material-symbols-outlined text-[18px] text-secondary">image</span>
+                <span>Save as Image (PNG)</span>
               </button>
             </div>
-          </div>
-          <div class="card-body p-4">
-            <!-- PDF Live Miniature Preview Box -->
-            <div class="pdf-preview-wrapper position-relative rounded-3 p-3 shadow-sm border bg-white cursor-pointer" id="pdfPreviewWrapper" title="Click to open full PDF invoice in a new page">
-              <div class="pdf-hover-overlay">
-                <span class="badge bg-primary fs-6 px-3 py-2 shadow"><i class="bi bi-box-arrow-up-right me-1"></i> Click to Open PDF in New Tab</span>
+
+            <!-- Interactive Miniature A4 PDF Preview Card -->
+            <div id="pdfPreviewWrapper" class="pdf-preview-wrapper relative rounded-xl p-4 border border-outline-variant bg-white cursor-pointer" title="Click to open full A4 PDF statement in a new tab">
+              <div class="pdf-hover-overlay rounded-xl">
+                <span class="px-4 py-2 rounded-lg bg-primary text-white font-bold text-xs shadow-lg flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                  Click to Open Printable A4 PDF Statement
+                </span>
               </div>
-              <div class="pdf-preview-doc" id="pdfPreviewDoc">
-                <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
-                  <div class="d-flex align-items-center gap-2">
-                    <img src="favicon.svg" alt="Logo" width="28" height="28" />
-                    <div>
-                      <strong class="d-block small text-primary">Utility Bill Statement</strong>
-                      <span class="d-block extra-small text-muted" id="miniDocPeriod">12 August 2026</span>
-                    </div>
-                  </div>
-                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle extra-small">Official PDF</span>
-                </div>
-                <div class="row g-2 p-2 bg-light rounded border mb-2 extra-small text-secondary">
-                  <div class="col-6 col-md-3"><span>Rate:</span> <strong class="text-dark d-block" id="miniDocRate">RM 0.33/kWh</strong></div>
-                  <div class="col-6 col-md-3"><span>Grid:</span> <span class="d-block" id="miniDocGrid">477 kWh</span></div>
-                  <div class="col-6 col-md-3"><span>Water:</span> <span class="d-block" id="miniDocWater">RM 1.75/pax</span></div>
-                  <div class="col-6 col-md-3"><span>Carryover:</span> <strong class="text-dark d-block" id="miniDocBalance">RM 0.26</strong></div>
-                </div>
-                <div class="border rounded overflow-hidden">
-                  <div class="d-flex bg-light fw-bold extra-small text-muted p-2 border-bottom">
-                    <span class="w-50">Tenant</span>
-                    <span class="w-25">Room</span>
-                    <span class="w-25 text-end">Total</span>
-                  </div>
-                  <div id="miniTenantRows" class="small">
-                    <!-- Populated dynamically -->
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-surface-container-high">
+                <div class="flex items-center gap-2">
+                  <img src="favicon.svg" alt="Logo" class="w-7 h-7 rounded" />
+                  <div>
+                    <strong class="block text-xs text-primary-dark">Official Utility Bill Statement</strong>
+                    <span class="block text-[10px] text-on-surface-variant" id="miniDocSubPeriod">Click to preview &amp; print A4 PDF</span>
                   </div>
                 </div>
+                <span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-mono text-[10px] font-bold border border-outline-variant">Official PDF</span>
               </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-2 bg-surface-container-low rounded-lg border border-outline-variant mb-2 text-[11px]">
+                <div><span class="text-on-surface-variant">Rate:</span> <strong class="block font-mono text-primary-dark" id="miniDocRate">RM 0.33/kWh</strong></div>
+                <div><span class="text-on-surface-variant">Grid:</span> <strong class="block font-mono text-on-surface" id="miniDocGrid">477 kWh</strong></div>
+                <div><span class="text-on-surface-variant">Water:</span> <strong class="block font-mono text-on-surface" id="miniDocWater">RM 1.75/pax</strong></div>
+                <div><span class="text-on-surface-variant">Carryover:</span> <strong class="block font-mono text-tertiary" id="miniDocBalance">RM 0.26</strong></div>
+              </div>
+              <div id="miniTenantRows" class="divide-y divide-surface-container-high text-xs"></div>
             </div>
           </div>
         </div>
       </section>
-    </main>
+    </div>
 
-    <!-- Bill History Offcanvas Drawer -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="historyOffcanvas" aria-labelledby="historyOffcanvasLabel" style="width: 460px; max-width: 100vw;">
-      <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title fw-bold text-primary d-flex align-items-center gap-2" id="historyOffcanvasLabel">
-          <i class="bi bi-clock-history"></i> Saved Bill History & Trends
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body d-flex flex-column justify-content-between">
+    <!-- =====================================================================
+         PAGE 2: BILL HISTORY & TRENDS
+         ===================================================================== -->
+    <div id="view-history" class="page-view hidden space-y-6">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <!-- Monthly Spending & Usage Trend Chart Card -->
-          <div id="historyChartCard" class="card border shadow-sm p-3 mb-3 hidden">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="extra-small fw-bold text-uppercase text-secondary">
-                <i class="bi bi-graph-up-arrow text-primary me-1"></i> Monthly RM & kWh Trend
-              </span>
-              <span class="badge bg-primary-subtle text-primary extra-small" id="historyAvgBadge">Avg: RM 0.00</span>
+          <div class="flex items-center gap-1.5 text-primary font-bold text-xs uppercase tracking-wider mb-1">
+            <span class="material-symbols-outlined text-[16px]">analytics</span>
+            <span>Audit Trail &amp; Consumption Insights</span>
+          </div>
+          <h1 class="font-headline font-bold text-3xl text-primary-dark tracking-tight">Billing History &amp; Trends</h1>
+          <p class="text-on-surface-variant text-sm max-w-2xl">
+            Reconciled multi-tenant utility distribution ledgers, AC sub-meter load records, and browser backup snapshots.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnSaveCurrentFromHistory" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-dark font-semibold text-xs shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+            <span>Archive Current Calculation</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Summary Metric Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Average Monthly Bill</span>
+              <span class="font-mono text-2xl font-bold text-primary-dark mt-1 block" id="histMetricAvgBill">RM 0.00</span>
             </div>
-            <div style="height: 190px; position: relative;">
-              <canvas id="historyTrendChart"></canvas>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]">payments</span>
             </div>
           </div>
-
-          <!-- Saved Bill Cards List -->
-          <div id="historyListContainer" class="d-flex flex-column gap-3">
-            <!-- Populated dynamically -->
+          <div class="mt-4 pt-2 border-t border-surface-container-high text-xs text-on-surface-variant flex justify-between">
+            <span>Combined Electric + Water</span>
+            <span class="font-mono font-semibold text-primary" id="histMetricAvgKwh">0 kWh avg</span>
           </div>
         </div>
 
-        <div class="border-top pt-3 mt-3 d-flex flex-column gap-2">
-          <div class="d-flex gap-2">
-            <button id="btnExportHistoryJson" class="btn btn-outline-primary btn-sm flex-grow-1" title="Download backup JSON of all saved history and current bill">
-              <i class="bi bi-download me-1"></i> Backup JSON
-            </button>
-            <button id="btnImportHistoryJson" class="btn btn-outline-secondary btn-sm flex-grow-1" title="Restore history from a JSON backup file">
-              <i class="bi bi-upload me-1"></i> Import JSON
-            </button>
-            <input type="file" id="inputImportHistoryFile" accept=".json,application/json" class="hidden" />
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Tracked Billing Cycles</span>
+              <span class="font-mono text-2xl font-bold text-primary mt-1 block" id="histMetricCount">0 Months</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+            </div>
           </div>
-          <button id="btnClearHistory" class="btn btn-outline-danger btn-sm w-100">
-            <i class="bi bi-trash3 me-1"></i> Clear All Saved History
-          </button>
+          <div class="mt-4 pt-2 border-t border-surface-container-high text-xs text-on-surface-variant flex justify-between">
+            <span class="font-mono font-semibold text-tertiary">100% RECONCILED</span>
+            <span>Browser LocalStorage</span>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Latest Carryover Surplus</span>
+              <span class="font-mono text-2xl font-bold text-tertiary mt-1 block" id="histMetricCarryover">+RM 0.00</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]">balance</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-2 border-t border-surface-container-high text-xs text-on-surface-variant flex justify-between">
+            <span class="px-2 py-0.5 bg-primary-fixed text-primary-dark rounded font-mono text-[10px] font-bold">FLOAT SAFE</span>
+            <span>House credit pool</span>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block">Peak AC Consumption</span>
+              <span class="font-headline text-xl font-bold text-primary-dark mt-1 block" id="histMetricPeakRoom">Master</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]">ac_unit</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-2 border-t border-surface-container-high text-xs text-on-surface-variant flex justify-between">
+            <span class="font-mono font-semibold text-primary" id="histMetricPeakKwh">0 kWh</span>
+            <span>Current active cycle</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts & Sub-Meter Distribution Bento -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Chart.js Trajectory (8 cols) -->
+        <div class="lg:col-span-8 bg-white p-6 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div>
+              <h2 class="font-headline font-bold text-lg text-primary-dark">Monthly Cost &amp; Consumption Trajectory</h2>
+              <p class="text-xs text-on-surface-variant">Total utility expenditure (RM) vs. aggregate grid usage (kWh)</p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary-dark font-mono text-xs font-bold self-start">Live Chart</span>
+          </div>
+          <div class="w-full h-64 relative">
+            <canvas id="historyTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Right: Room Sub-Meter Load Breakdown (4 cols) -->
+        <div class="lg:col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <h2 class="font-headline font-bold text-lg text-primary-dark">Sub-Meter AC Load</h2>
+              <span class="material-symbols-outlined text-primary">ac_unit</span>
+            </div>
+            <p class="text-xs text-on-surface-variant mb-4">Active room AC kWh share across the house</p>
+            <div id="histRoomLoadList" class="flex flex-col gap-4"></div>
+          </div>
+          <div class="mt-6 p-3 bg-surface-container-low rounded-xl border border-outline-variant flex items-start gap-2 text-xs text-on-surface-variant">
+            <span class="material-symbols-outlined text-[18px] text-primary shrink-0">info</span>
+            <p>Common area appliances (fridge, washing machine, router, lighting) are excluded from sub-meters and divided equally.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historical Billing Archive Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-outline-variant p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-headline font-bold text-lg text-primary-dark">Historical Billing Archive</h2>
+            <p class="text-xs text-on-surface-variant">Saved monthly statements with one-click restore or PDF export</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-2.5 top-2 text-[18px] text-on-surface-variant">search</span>
+              <input type="text" id="historySearchInput" placeholder="Filter period..." class="pl-8 pr-3 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant text-xs focus:bg-white focus:outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-outline-variant">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low text-primary-dark font-mono text-[11px] uppercase border-b border-outline-variant">
+                <th class="py-3 px-4">Billing Period</th>
+                <th class="py-3 px-4">Electric (RM / kWh)</th>
+                <th class="py-3 px-4">Water (RM)</th>
+                <th class="py-3 px-4">Effective Rate</th>
+                <th class="py-3 px-4 text-center">Tenants</th>
+                <th class="py-3 px-4">Carryover Out</th>
+                <th class="py-3 px-4 text-right">Total Collected</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="historyArchiveTableBody" class="divide-y divide-surface-container-high text-xs"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Data Management & Browser Backup -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div class="md:col-span-8 bg-white p-6 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="material-symbols-outlined text-primary">cloud_sync</span>
+              <h2 class="font-headline font-bold text-lg text-primary-dark">Data Management &amp; Browser Backup</h2>
+            </div>
+            <p class="text-xs text-on-surface-variant">
+              Download your complete ledger snapshot including meter readings, tenant directory profiles, and saved history as a portable JSON file.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant flex flex-col justify-between">
+                <div>
+                  <span class="font-bold text-xs text-primary-dark block">Snapshot Export (JSON)</span>
+                  <p class="text-xs text-on-surface-variant mt-1">Full backup of current state and all archived monthly bills.</p>
+                </div>
+                <button type="button" id="btnExportHistoryJson" class="mt-4 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark font-semibold text-xs shadow-sm transition-all">
+                  <span class="material-symbols-outlined text-[18px]">download</span>
+                  <span>Backup Data (Export JSON)</span>
+                </button>
+              </div>
+
+              <div id="btnImportHistoryJson" class="p-4 rounded-xl bg-surface-container-low border-2 border-dashed border-secondary-container flex flex-col items-center justify-center text-center hover:bg-surface-container-high cursor-pointer transition-all">
+                <span class="material-symbols-outlined text-[28px] text-primary">upload_file</span>
+                <span class="font-bold text-xs text-primary-dark mt-1">Import &amp; Restore JSON</span>
+                <p class="text-[11px] text-on-surface-variant mt-0.5">Click to browse a saved <code class="font-mono">.json</code> backup file</p>
+                <input type="file" id="inputImportHistoryFile" accept=".json,application/json" class="hidden" />
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-surface-container-high flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="font-bold text-xs text-error flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px]">warning</span> Clear Saved History
+              </span>
+              <p class="text-xs text-on-surface-variant">Remove all archived monthly statements from this browser.</p>
+            </div>
+            <button type="button" id="btnClearHistory" class="px-4 py-2 rounded-lg bg-error-container text-on-error-container hover:opacity-90 font-semibold text-xs shrink-0">
+              Clear All Saved History
+            </button>
+          </div>
+        </div>
+
+        <div class="md:col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-3">
+              <span class="material-symbols-outlined text-[20px]">lock</span>
+            </div>
+            <h3 class="font-headline font-bold text-base text-primary-dark">Client-Side Privacy Guarantee</h3>
+            <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">
+              All billing calculations, sub-meter readings, and tenant ledgers are stored strictly inside your browser's local storage.
+            </p>
+            <ul class="space-y-2 mt-4 text-xs text-on-surface-variant">
+              <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-tertiary text-[16px]">check_circle</span> No cloud tracking or account required</li>
+              <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-tertiary text-[16px]">check_circle</span> Instant offline calculation support</li>
+              <li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-tertiary text-[16px]">check_circle</span> Portable JSON backup &amp; restore</li>
+            </ul>
+          </div>
+          <div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant mt-4">
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-on-surface-variant">LocalStorage Used:</span>
+              <strong class="text-primary" id="dispStorageQuota">4.2 KB</strong>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="mt-5 pt-4 border-top text-center text-muted small">
-      <p class="mb-1"><strong>House Utility Bill Calculator</strong> — Electricity & Water Bill Splitter</p>
-      <p class="extra-small mb-0">Data stays locally in your browser. Free & open source.</p>
-    </footer>
+    <!-- =====================================================================
+         PAGE 3: TENANT & ROOM DIRECTORY
+         ===================================================================== -->
+    <div id="view-directory" class="page-view hidden space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-primary-fixed text-primary font-mono text-xs font-semibold border border-outline-variant">
+              <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+              ACTIVE HOUSEHOLD DIRECTORY
+            </span>
+          </div>
+          <h1 class="font-headline font-bold text-3xl text-primary-dark tracking-tight">House Directory &amp; Room Sub-Meter Setup</h1>
+          <p class="text-on-surface-variant text-sm max-w-2xl">
+            Manage rooms, assigned housemates, WhatsApp contact numbers, preferred settlement methods, and monthly payment statuses.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btnDirAddRoom" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-outline-variant text-primary-dark hover:bg-surface-container-low font-semibold text-xs shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[18px] text-primary">meeting_room</span>
+            <span>+ Add New Room</span>
+          </button>
+          <button type="button" id="btnDirGoCalc" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-dark font-semibold text-xs shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[18px]">calculate</span>
+            <span>Edit Meter Readings</span>
+          </button>
+        </div>
+      </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast-popup">Copied to clipboard!</div>
+      <!-- 3 Directory Overview KPI Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-mono text-xs uppercase text-on-surface-variant">Occupancy Density</span>
+              <div class="font-mono text-2xl font-bold text-primary-dark mt-1" id="dirMetricOccupancy">3 Rooms / 4 Tenants</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]">groups</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-surface-container-high flex items-center justify-between">
+            <div id="dirAvatarStack" class="flex -space-x-2"></div>
+            <span class="font-mono text-xs text-tertiary font-semibold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[15px]">check_circle</span> 100% Assigned
+            </span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-mono text-xs uppercase text-on-surface-variant">Dedicated Sub-Meters</span>
+              <div class="font-mono text-2xl font-bold text-primary-dark mt-1" id="dirMetricMeters">3 Online Active</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]">electric_meter</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-surface-container-high flex items-center justify-between text-xs text-on-surface-variant">
+            <span>Sub-Metered AC Tracking</span>
+            <span class="font-mono text-primary font-semibold" id="dirMetricTotalAcKwh">0 kWh total AC</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-mono text-xs uppercase text-on-surface-variant">Collection Status</span>
+              <div class="font-mono text-2xl font-bold text-primary-dark mt-1" id="dirMetricPaidCount">0/4 Paid</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[20px]">payments</span>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-surface-container-high flex items-center gap-3">
+            <div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+              <div id="dirPaidProgressBar" class="bg-primary h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+            </div>
+            <span class="font-mono text-xs font-bold text-primary" id="dirPaidPercent">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Room Allocations & Sub-Meters Grid -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h2 class="font-headline font-bold text-xl text-primary-dark">Room Allocations &amp; Sub-Meters</h2>
+            <span class="px-2.5 py-0.5 rounded-full bg-primary-fixed text-primary font-mono text-xs font-semibold border border-outline-variant" id="dirZonesBadge">3 zones</span>
+          </div>
+        </div>
+        <div id="directoryRoomsGrid" class="grid grid-cols-1 lg:grid-cols-3 gap-5"></div>
+      </div>
+
+      <!-- Tenant Ledger & Payment Preferences Table -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-outline-variant space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-headline font-bold text-xl text-primary-dark">Tenant Ledger &amp; Payment Preferences</h2>
+            <p class="text-xs text-on-surface-variant">Click any phone number, settlement method, or status pill below to update your household directory.</p>
+          </div>
+          <button type="button" id="btnDirBroadcastWa" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-dark font-semibold text-xs shadow-sm transition-all self-start">
+            <span class="material-symbols-outlined text-[16px]">send</span>
+            <span>Share to WhatsApp</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-outline-variant">
+          <table class="w-full text-left border-collapse min-w-[720px]">
+            <thead>
+              <tr class="bg-surface-container-low text-primary-dark font-mono text-[11px] uppercase border-b border-outline-variant">
+                <th class="py-3 px-4">Housemate &amp; Room</th>
+                <th class="py-3 px-3">WhatsApp Contact</th>
+                <th class="py-3 px-3">Settlement Method</th>
+                <th class="py-3 px-3">AC Sub-Meter Share</th>
+                <th class="py-3 px-3 text-right">Current Payable</th>
+                <th class="py-3 px-3 text-center">Payment Status</th>
+              </tr>
+            </thead>
+            <tbody id="directoryLedgerTableBody" class="divide-y divide-surface-container-high text-xs"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         PAGE 4: HOW IT WORKS & GUIDE
+         ===================================================================== -->
+    <div id="view-guide" class="page-view hidden space-y-8">
+      <!-- Intro Hero -->
+      <section class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-outline-variant space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed text-primary-dark font-mono text-xs font-bold border border-outline-variant">
+            <span class="material-symbols-outlined text-[16px]">balance</span>
+            ZERO ROOMMATE FRICTION BLUEPRINT
+          </span>
+          <span class="font-mono text-xs text-on-surface-variant">TNB &amp; Water Split Engine</span>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+          <div class="lg:col-span-8 space-y-2">
+            <h1 class="font-headline font-bold text-3xl sm:text-4xl text-primary-dark tracking-tight">Fair Utility Bill Splitting Explained</h1>
+            <p class="text-on-surface-variant text-sm sm:text-base leading-relaxed">
+              Transparent mathematical formulas engineered for households with dedicated bedroom AC sub-meters. Eliminate group chat guesswork, guarantee exact kWh accountability, and keep shared areas equitable.
+            </p>
+          </div>
+          <div class="lg:col-span-4 flex flex-wrap lg:justify-end gap-2">
+            <a href="#simulatorSection" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark font-semibold text-xs shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px]">tune</span>
+              <span>Formula Sandbox</span>
+            </a>
+            <button type="button" id="btnPrintCharter" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-surface-container-low text-primary-dark hover:bg-surface-container-highest border border-outline-variant font-semibold text-xs transition-all">
+              <span class="material-symbols-outlined text-[18px]">print</span>
+              <span>Print House Charter</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3-Step Formula Cards -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary-dark font-mono text-xs font-bold border border-outline-variant">STEP 01</span>
+              <span class="material-symbols-outlined text-primary text-[28px]">electric_meter</span>
+            </div>
+            <h3 class="font-headline font-bold text-lg text-primary-dark mb-2">Sub-Meter AC Usage</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed mb-4">
+              Every room with private air conditioning is recorded at the end of the billing cycle. Occupants pay strictly for the kWh their bedroom draws.
+            </p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant font-mono text-xs text-primary-dark font-semibold">
+            (Current Meter − Previous Meter) = Room AC kWh
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary-dark font-mono text-xs font-bold border border-outline-variant">STEP 02</span>
+              <span class="material-symbols-outlined text-primary text-[28px]">group_work</span>
+            </div>
+            <h3 class="font-headline font-bold text-lg text-primary-dark mb-2">Common Area Share</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed mb-4">
+              Total grid consumption minus all bedroom AC sub-meters equals common area usage (fridge, washing machine, lights, Wi-Fi), split equally across all N tenants.
+            </p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant font-mono text-xs text-primary-dark font-semibold">
+            (Total Grid kWh − Σ Room AC kWh) ÷ N Tenants
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 rounded-full bg-primary-fixed text-primary-dark font-mono text-xs font-bold border border-outline-variant">STEP 03</span>
+              <span class="material-symbols-outlined text-primary text-[28px]">currency_exchange</span>
+            </div>
+            <h3 class="font-headline font-bold text-lg text-primary-dark mb-2">Rate &amp; Carryover Surplus</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed mb-4">
+              The effective rate rounds up to the nearest cent (e.g. RM 0.33/kWh) so the bill payer is never shortchanged. Any extra cents roll over to deduct next month's bill.
+            </p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant font-mono text-xs text-primary-dark font-semibold">
+            ⌈(Electric Bill − Prev Carryover) ÷ Grid kWh⌉
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Formula Sandbox Simulator -->
+      <section id="simulatorSection" class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-outline-variant space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold text-primary uppercase">Interactive Sandbox</span>
+            <h2 class="font-headline font-bold text-2xl text-primary-dark">Test Scenarios Without Touching Your Saved Bill</h2>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-sim-preset="standard" class="sim-preset-btn px-3 py-1.5 rounded-lg bg-primary text-white font-semibold text-xs">3-Room Standard</button>
+            <button type="button" data-sim-preset="heavy" class="sim-preset-btn px-3 py-1.5 rounded-lg bg-surface-container-low text-primary-dark border border-outline-variant font-semibold text-xs">Summer AC Surge</button>
+            <button type="button" data-sim-preset="away" class="sim-preset-btn px-3 py-1.5 rounded-lg bg-surface-container-low text-primary-dark border border-outline-variant font-semibold text-xs">1 Room 0 kWh AC</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-5 p-5 rounded-xl bg-surface-container-low border border-outline-variant space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs font-semibold text-primary-dark block mb-1">Bill Total (RM)</label>
+                <input type="number" step="0.01" id="simBillTotal" value="184.50" class="sim-input w-full px-3 py-2 rounded-lg bg-white border border-outline-variant font-mono text-xs font-bold" />
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-primary-dark block mb-1">Grid Usage (kWh)</label>
+                <input type="number" step="1" id="simTotalKwh" value="520" class="sim-input w-full px-3 py-2 rounded-lg bg-white border border-outline-variant font-mono text-xs font-bold" />
+              </div>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-primary-dark block mb-1">Prior Carryover Credit (RM)</label>
+              <input type="number" step="0.01" id="simCarryover" value="0.84" class="sim-input w-full px-3 py-2 rounded-lg bg-white border border-outline-variant font-mono text-xs font-bold" />
+            </div>
+            <div class="space-y-2 pt-2 border-t border-outline-variant">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold">Room 1 AC (kWh)</span>
+                <input type="number" id="simR1" value="145" class="sim-input w-24 px-2 py-1 rounded bg-white border border-outline-variant font-mono text-right font-bold" />
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold">Room 2 AC (kWh)</span>
+                <input type="number" id="simR2" value="115" class="sim-input w-24 px-2 py-1 rounded bg-white border border-outline-variant font-mono text-right font-bold" />
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold">Room 3 AC (kWh)</span>
+                <input type="number" id="simR3" value="40" class="sim-input w-24 px-2 py-1 rounded bg-white border border-outline-variant font-mono text-right font-bold" />
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 flex flex-col justify-between gap-4">
+            <div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <span class="text-xs font-bold uppercase text-on-surface-variant block">Sandbox Effective Rate (Ceil)</span>
+                <span class="font-mono text-2xl font-bold text-primary" id="simOutRateCeil">RM 0.36 / kWh</span>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-on-surface-variant block">Raw Unrounded Rate</span>
+                <span class="font-mono text-sm font-semibold text-primary-dark" id="simOutRateRaw">RM 0.35319 / kWh</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="p-4 rounded-xl bg-white border border-outline-variant">
+                <span class="font-bold text-xs text-primary-dark block">Room 1 Resident</span>
+                <div class="text-xs text-on-surface-variant mt-2 space-y-1 font-mono">
+                  <div class="flex justify-between"><span>AC:</span><span id="simOutR1Ac">RM 52.20</span></div>
+                  <div class="flex justify-between"><span>Common:</span><span id="simOutR1Com">RM 26.40</span></div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-surface-container-high flex justify-between items-baseline">
+                  <span class="text-xs text-on-surface-variant">Total</span>
+                  <strong class="font-mono text-base text-primary" id="simOutR1Tot">RM 78.60</strong>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-white border border-outline-variant">
+                <span class="font-bold text-xs text-primary-dark block">Room 2 Resident</span>
+                <div class="text-xs text-on-surface-variant mt-2 space-y-1 font-mono">
+                  <div class="flex justify-between"><span>AC:</span><span id="simOutR2Ac">RM 41.40</span></div>
+                  <div class="flex justify-between"><span>Common:</span><span id="simOutR2Com">RM 26.40</span></div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-surface-container-high flex justify-between items-baseline">
+                  <span class="text-xs text-on-surface-variant">Total</span>
+                  <strong class="font-mono text-base text-primary" id="simOutR2Tot">RM 67.80</strong>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-white border border-outline-variant">
+                <span class="font-bold text-xs text-primary-dark block">Room 3 Resident</span>
+                <div class="text-xs text-on-surface-variant mt-2 space-y-1 font-mono">
+                  <div class="flex justify-between"><span>AC:</span><span id="simOutR3Ac">RM 14.40</span></div>
+                  <div class="flex justify-between"><span>Common:</span><span id="simOutR3Com">RM 26.40</span></div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-surface-container-high flex justify-between items-baseline">
+                  <span class="text-xs text-on-surface-variant">Total</span>
+                  <strong class="font-mono text-base text-primary" id="simOutR3Tot">RM 40.80</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-primary-fixed border border-outline-variant flex items-center justify-between">
+              <span class="text-xs font-semibold text-primary-dark">Simulated Collected vs. Net Bill Surplus:</span>
+              <span class="font-mono font-bold text-sm text-tertiary" id="simOutSurplus">+RM 3.54 Carryover</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ Accordion & House Rules Agreement -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-white p-6 rounded-2xl shadow-sm border border-outline-variant space-y-3">
+          <h3 class="font-headline font-bold text-xl text-primary-dark mb-2">Frequently Asked Roommate Scenarios</h3>
+          <details class="group p-4 rounded-xl bg-surface-container-low border border-outline-variant" open>
+            <summary class="flex items-center justify-between cursor-pointer font-bold text-xs text-primary-dark">
+              <span>What if someone goes on vacation for 2 weeks?</span>
+              <span class="material-symbols-outlined text-[18px]">expand_more</span>
+            </summary>
+            <p class="mt-2 text-xs text-on-surface-variant leading-relaxed">
+              Because bedroom air conditioning is sub-metered, their individual AC reading will register 0 kWh while they are away. Meanwhile, common area expenses (refrigerator running 24/7, Wi-Fi, base water fee) remain shared equally.
+            </p>
+          </details>
+          <details class="group p-4 rounded-xl bg-surface-container-low border border-outline-variant">
+            <summary class="flex items-center justify-between cursor-pointer font-bold text-xs text-primary-dark">
+              <span>Why is there a carryover balance, and who keeps that change?</span>
+              <span class="material-symbols-outlined text-[18px]">expand_more</span>
+            </summary>
+            <p class="mt-2 text-xs text-on-surface-variant leading-relaxed">
+              Rounding up to the nearest RM 0.01 prevents the bill representative from paying out-of-pocket for fractional cents. The small excess collected stays in the house pool and is automatically deducted from next month's electric bill.
+            </p>
+          </details>
+          <details class="group p-4 rounded-xl bg-surface-container-low border border-outline-variant">
+            <summary class="flex items-center justify-between cursor-pointer font-bold text-xs text-primary-dark">
+              <span>How are TNB progressive tariff blocks handled?</span>
+              <span class="material-symbols-outlined text-[18px]">expand_more</span>
+            </summary>
+            <p class="mt-2 text-xs text-on-surface-variant leading-relaxed">
+              By dividing the net TNB bill by total grid kWh, UtilitySplit derives the exact blended unit rate for that billing cycle so high-AC users pay proportionally for the kWh they consume.
+            </p>
+          </details>
+        </div>
+
+        <div class="lg:col-span-5 bg-white p-6 rounded-2xl shadow-sm border border-outline-variant flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded bg-primary-fixed text-primary-dark font-mono text-xs font-bold">CHARTER TEMPLATE</span>
+              <span class="material-symbols-outlined text-primary">assignment</span>
+            </div>
+            <h3 class="font-headline font-bold text-xl text-primary-dark">Roommate House Rules Agreement</h3>
+            <div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant text-xs space-y-2 text-on-surface">
+              <p><strong>1. Sub-Meter Photos:</strong> Room sub-meter readings are recorded on bill issue day and shared in the WhatsApp group.</p>
+              <p><strong>2. 48-Hour Settlement:</strong> UtilitySplit statements are settled via DuitNow / Instant Transfer within 48 hours.</p>
+              <p><strong>3. Common Area Etiquette:</strong> Shared living area fans and lights are switched off when unoccupied.</p>
+              <p><strong>4. Carryover Reserve:</strong> Rounding surplus belongs to the house pool and deducts next month's bill.</p>
+            </div>
+          </div>
+          <button type="button" onclick="window.print()" class="mt-4 w-full py-2.5 px-4 rounded-xl bg-primary text-white hover:bg-primary-dark font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">print</span>
+            <span>Print House Rules Agreement</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- ==================== MOBILE BOTTOM TAB BAR ==================== -->
+  <nav class="xl:hidden fixed bottom-0 w-full z-50 bg-white/95 backdrop-blur-xl border-t border-outline-variant shadow-lg no-print">
+    <div class="h-16 px-2 flex items-center justify-around">
+      <button type="button" data-nav="calculator" class="nav-tab-btn active flex flex-col items-center justify-center w-20 py-1 rounded-xl text-primary font-bold text-[11px]">
+        <span class="material-symbols-outlined text-[22px]">calculate</span>
+        <span>Calculator</span>
+      </button>
+      <button type="button" data-nav="history" class="nav-tab-btn flex flex-col items-center justify-center w-20 py-1 rounded-xl text-on-surface-variant font-semibold text-[11px]">
+        <span class="material-symbols-outlined text-[22px]">analytics</span>
+        <span>History</span>
+      </button>
+      <button type="button" data-nav="directory" class="nav-tab-btn flex flex-col items-center justify-center w-20 py-1 rounded-xl text-on-surface-variant font-semibold text-[11px]">
+        <span class="material-symbols-outlined text-[22px]">groups</span>
+        <span>Directory</span>
+      </button>
+      <button type="button" data-nav="guide" class="nav-tab-btn flex flex-col items-center justify-center w-20 py-1 rounded-xl text-on-surface-variant font-semibold text-[11px]">
+        <span class="material-symbols-outlined text-[22px]">menu_book</span>
+        <span>Guide</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="w-full bg-white border-t border-outline-variant py-6 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-on-surface-variant">
+      <div class="flex items-center gap-2">
+        <img src="favicon.svg" alt="Logo" class="w-5 h-5 rounded" />
+        <span><strong>UtilitySplit</strong> — House Utility Bill Calculator with Sub-Meters &amp; Carryover</span>
+      </div>
+      <span>Data stays locally in your browser. Free &amp; open source.</span>
+    </div>
+  </footer>
+
+  <!-- ==================== PRINTABLE CHARTER SHEET ==================== -->
+  <div class="hidden print:block p-8 bg-white text-black">
+    <div class="border-b-2 border-black pb-4 mb-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold">UtilitySplit — House Utility Rules &amp; Agreement</h1>
+        <p class="text-sm text-gray-600">Fair Roommate Co-Living Charter &amp; Sub-Meter Operating Procedure</p>
+      </div>
+      <img src="favicon.svg" alt="Logo" class="w-12 h-12" />
+    </div>
+    <div class="space-y-4 text-sm leading-relaxed">
+      <p><strong>Article 1: Sub-Meter Accountability.</strong> Each bedroom equipped with an electric sub-meter accepts full liability for kWh recorded between the start and end of the billing cycle.</p>
+      <p><strong>Article 2: Shared Common Allocation.</strong> Common grid consumption is defined as Master TNB Bill kWh minus the sum of all bedroom sub-meters, divided equally among all active house residents.</p>
+      <p><strong>Article 3: Effective Unit Rate.</strong> The unit rate equals Net Electric Bill (Gross Bill minus prior carryover surplus) divided by Total Grid kWh, rounded up to the nearest RM 0.01.</p>
+      <p><strong>Article 4: Carryover Reserve.</strong> Any rounding surplus collected belongs to the house reserve and is automatically deducted from the following month's electric bill.</p>
+    </div>
   </div>
 
-  <!-- html2canvas CDN for PNG Image Export -->
+  <!-- Toast Popup -->
+  <div id="toast" class="toast-popup no-print">Copied to clipboard!</div>
+
+  <!-- External Libraries: html2canvas & Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <!-- Chart.js CDN for Spending & kWh Trend Visualization -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <!-- Bootstrap 5 JS Bundle CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="app.js"></script>
 </body>
 </html>

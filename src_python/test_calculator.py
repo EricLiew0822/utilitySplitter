@@ -15,9 +15,9 @@ class TestBillCalculator(unittest.TestCase):
             total_kwh=477.0,
             water_amount=7.00,
             rooms=[
-                Room(name="Master", prev_meter=5574, curr_meter=5774, tenants=["Bryan", "Lim"]),
+                Room(name="Master", prev_meter=5574, curr_meter=5774, tenants=["Bryan", "Thomas"]),
                 Room(name="Middle", prev_meter=4693, curr_meter=4693, tenants=["Eric"]),
-                Room(name="Small", prev_meter=4255, curr_meter=4312, tenants=["Honger"]),
+                Room(name="Small", prev_meter=4255, curr_meter=4312, tenants=["Alex"]),
             ],
             rate_mode="ceil"
         )
@@ -43,9 +43,9 @@ class TestBillCalculator(unittest.TestCase):
         # 5. Tenant breakdowns check
         tenant_map = {t.tenant_name: t for t in res.tenant_breakdowns}
         self.assertAlmostEqual(tenant_map["Bryan"].total, 52.90, places=2)
-        self.assertAlmostEqual(tenant_map["Lim"].total, 52.90, places=2)
+        self.assertAlmostEqual(tenant_map["Thomas"].total, 52.90, places=2)
         self.assertAlmostEqual(tenant_map["Eric"].total, 19.90, places=2)
-        self.assertAlmostEqual(tenant_map["Honger"].total, 38.71, places=2)
+        self.assertAlmostEqual(tenant_map["Alex"].total, 38.71, places=2)
 
         # 6. Totals & Balance check
         self.assertAlmostEqual(res.total_collected, 164.41, places=2)
